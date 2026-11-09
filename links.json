@@ -3,18 +3,18 @@
     "type": "url",
     "value": "https://www.dropbox.com/scl/fi/qxipnqef2coita2wagkey/.pdf?rlkey=a2tlaj98spglt1guekszhiwqq&raw=1",
     "title": "PRO-101",
-    "updatedAt": "١٠ نوفمبر ٢٠٢٦، ٠١:٣٨ ص",
+    "updatedAt": "١٠ نوفمبر ٢٠٢٦، ٠١:٥٩ ص",
     "style": {
-      "dotsColor": "#000000",
-      "cornersColor": "#000000",
+      "dotsColor": "#2119fa",
+      "cornersColor": "#2119fa",
       "bgColor": "#ffffff",
       "transparentBg": false,
       "dotsType": "rounded",
       "cornerSquareType": "extra-rounded",
       "cornerDotType": "dot",
       "errorCorrectionLevel": "H",
-      "qrTypeNumber": 0,
-      "qrMargin": 8
+      "qrTypeNumber": 9,
+      "qrMargin": 6
     }
   },
   "PDF-1": "https://drive.google.com/file/d/YOUR_FILE_ID/view",
