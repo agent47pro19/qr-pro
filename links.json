@@ -1,5 +1,22 @@
 {
-  "PRO-101": "https://www.dropbox.com/scl/fi/qxipnqef2coita2wagkey/.pdf?rlkey=a2tlaj98spglt1guekszhiwqq&raw=1",
+  "PRO-101": {
+    "type": "url",
+    "value": "https://www.dropbox.com/scl/fi/qxipnqef2coita2wagkey/.pdf?rlkey=a2tlaj98spglt1guekszhiwqq&raw=1",
+    "title": "PRO-101",
+    "updatedAt": "١٠ نوفمبر ٢٠٢٦، ٠١:٣٨ ص",
+    "style": {
+      "dotsColor": "#000000",
+      "cornersColor": "#000000",
+      "bgColor": "#ffffff",
+      "transparentBg": false,
+      "dotsType": "rounded",
+      "cornerSquareType": "extra-rounded",
+      "cornerDotType": "dot",
+      "errorCorrectionLevel": "H",
+      "qrTypeNumber": 0,
+      "qrMargin": 8
+    }
+  },
   "PDF-1": "https://drive.google.com/file/d/YOUR_FILE_ID/view",
   "MENU": "https://example.com/menu.pdf"
 }
