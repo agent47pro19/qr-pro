@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Studio Pro | استوديو الكيو آر الاحترافي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background-color: #0f172a; color: #f8fafc; }
+    .checkerboard {
+      background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%),
+                        linear-gradient(-45deg, #1e293b 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #1e293b 75%),
+                        linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    input[type="range"] { accent-color: #6366f1; }
+  </style>
+  <script>
+    // نظام التوجيه التلقائي عند مسح الكيو آر الديناميكي من الجوال
+    (async function handleDynamicRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const qrId = params.get('id');
+      if (!qrId) return; // إذا لم يكن هناك id في الرابط، افتح لوحة التحكم بشكل طبيعي
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.innerHTML = `
+          <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0f172a;color:#fff;font-family:'Cairo',sans-serif;text-align:center;padding:20px;">
+            <div style="width:48px;height:48px;border:4px solid #6366f1;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
+            <h2 style="font-size:18px;font-weight:bold;">جاري تحويلك إلى المحتوى...</h2>
+            <p id="redirectStatus" style="color:#94a3b8;font-size:13px;margin-top:8px;">المعرف: ${qrId}</p>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+          </div>
+        `;
+      });
+
+      try {
+        // جلب أحدث نسخة من ملف links.json بدون كاش
+        const res = await fetch('./links.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) throw new Error('لم يتم العثور على ملف links.json');
+        const links = await res.json();
+        const targetUrl = links[qrId];
+
+        if (targetUrl) {
+          window.location.replace(targetUrl);
+        } else {
+          document.getElementById('redirectStatus').innerHTML =
+            `<span style="color:#f87171;">المعرف "${qrId}" غير موجود داخل ملف links.json في GitHub.</span>`;
+        }
+      } catch (err) {
+        document.getElementById('redirectStatus').innerHTML =
+          `<span style="color:#f87171;">تعذر قراءة ملف links.json. تأكد من إنشائه في نفس مستودع GitHub.</span>`;
+      }
+    })();
+  </script>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+  <div class="max-w-7xl mx-auto">
+    <header class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-800">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold bg-gradient-to-l from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+          QR Studio Pro — نسخة GitHub الديناميكية
+        </h1>
+        <p class="text-slate-400 text-sm mt-1">تحكم كامل، بدون خلفية أو علامات مائية، مع ربط مباشر بـ GitHub Pages</p>
+      </div>
+      <div id="hostBadge" class="flex items-center gap-2 bg-indigo-950/60 border border-indigo-700/50 text-indigo-300 px-4 py-2 rounded-xl text-xs font-semibold">
+        <span>جاهز للربط مع GitHub Pages</span>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Controls -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <!-- 1. Content & Dynamic Mode -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-indigo-400">1. نوع المحتوى والوضع الديناميكي</h2>
+            <span id="scanModeBadge" class="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">
+              مسح مباشر
+            </span>
+          </div>
+
+          <!-- Dynamic QR Toggle -->
+          <div class="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-white">تفعيل الوضع الديناميكي عبر GitHub (`links.json`)</h3>
+                <p class="text-xs text-slate-400">يثبت شكل الـ QR للأبد، وتغير الرابط أو الـ PDF من ملف `links.json` في GitHub متى شئت</p>
+              </div>
+              <input id="dynamicToggle" type="checkbox" onchange="toggleDynamicMode()" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer" />
+            </div>
+
+            <div id="dynamicConfigBox" class="hidden pt-3 border-t border-slate-800 space-y-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="md:col-span-2">
+                  <label class="text-xs text-slate-400">رابط موقعك على GitHub Pages:</label>
+                  <input id="dynamicBaseUrl" type="url" placeholder="https://username.github.io/qr-pro/" oninput="updateQR()"
+                    class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs dir-ltr text-left text-emerald-300 font-mono" />
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400">كود المعرّف في `links.json`:</label>
+                  <input id="dynamicShortId" type="text" value="PRO-101" oninput="updateQR()"
+                    class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs dir-ltr text-center font-mono text-amber-300" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct Input Box -->
+          <div id="directContentBox" class="space-y-3">
+            <label class="text-xs text-slate-300 font-semibold block">الرابط المباشر أو رابط ملف الـ PDF السحابي (Google Drive / Dropbox / GitHub Release):</label>
+            <input id="qrUrlInput" type="text" value="https://google.com" oninput="updateQR()"
+              placeholder="https://..."
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:border-indigo-500 focus:outline-none dir-ltr text-left" />
+          </div>
+        </section>
+
+        <!-- 2. Colors -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+          <h2 class="text-lg font-bold text-indigo-400">2. الألوان (نسخ ولصق HEX) وشفافية الخلفية</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+              <label class="text-xs text-slate-400 font-semibold block">لون نقاط الـ QR</label>
+              <div class="flex items-center gap-2">
+                <input id="dotsColorPicker" type="color" value="#000000" oninput="syncColor('dots', this.value)" class="w-9 h-9 rounded cursor-pointer bg-transparent border-0" />
+                <input id="dotsColorHex" type="text" value="#000000" oninput="syncHex('dots', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
+                <button onclick="copyHex('dotsColorHex')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs">نسخ</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+              <label class="text-xs text-slate-400 font-semibold block">لون إطارات الزوايا</label>
+              <div class="flex items-center gap-2">
+                <input id="cornersColorPicker" type="color" value="#000000" oninput="syncColor('corners', this.value)" class="w-9 h-9 rounded cursor-pointer bg-transparent border-0" />
+                <input id="cornersColorHex" type="text" value="#000000" oninput="syncHex('corners', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
+                <button onclick="copyHex('cornersColorHex')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs">نسخ</button>
+              </div>
+            </div>
+
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+              <label class="text-xs text-slate-400 font-semibold block">لون الخلفية</label>
+              <div class="flex items-center gap-2">
+                <input id="bgColorPicker" type="color" value="#ffffff" oninput="syncColor('bg', this.value)" class="w-9 h-9 rounded cursor-pointer bg-transparent border-0" />
+                <input id="bgColorHex" type="text" value="#FFFFFF" oninput="syncHex('bg', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
+                <button onclick="copyHex('bgColorHex')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs">نسخ</button>
+              </div>
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-200 font-semibold pt-2">
+            <input id="transparentBg" type="checkbox" onchange="updateQR()" class="w-4 h-4 accent-indigo-600 rounded" />
+            <span>بدون مربع خلفية (خلفية شفافة بالكامل)</span>
+          </label>
+        </section>
+
+        <!-- 3. Shapes & Logo -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+          <h2 class="text-lg font-bold text-indigo-400">3. شكل الكيو آر وتكبير الشعار</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">شكل النقاط:</label>
+              <select id="dotsType" onchange="updateQR()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+                <option value="square">مربعات (Square)</option>
+                <option value="rounded" selected>حواف ناعمة (Rounded)</option>
+                <option value="dots">دوائر (Dots)</option>
+                <option value="classy">أنيق (Classy)</option>
+                <option value="classy-rounded">أنيق دائري</option>
+                <option value="extra-rounded">دائري فائق</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">إطار الزاوية الخارجي:</label>
+              <select id="cornerSquareType" onchange="updateQR()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+                <option value="square">مربع حاد</option>
+                <option value="extra-rounded" selected>مربع دائري ناعم</option>
+                <option value="dot">دائري</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">نقطة الزاوية الداخلية:</label>
+              <select id="cornerDotType" onchange="updateQR()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+                <option value="square">مربع</option>
+                <option value="dot" selected>دائرة</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-800 pt-4 space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-bold text-white">رفع الشعار (Logo) وتكبيره</label>
+              <button onclick="removeLogo()" class="text-xs text-rose-400 bg-rose-950/40 px-3 py-1.5 rounded-lg border border-rose-800/40">حذف الشعار</button>
+            </div>
+
+            <input id="logoInput" type="file" accept="image/*" onchange="handleLogoUpload(event)"
+              class="block w-full text-xs text-slate-300 file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white cursor-pointer bg-slate-950 rounded-xl border border-slate-800 p-2" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span>حجم الشعار:</span>
+                  <span id="logoSizeVal" class="text-indigo-400 font-bold">42%</span>
+                </div>
+                <input id="logoSize" type="range" min="0.15" max="0.55" step="0.02" value="0.42" oninput="updateQR()" class="w-full" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span>الهامش حول الشعار:</span>
+                  <span id="logoMarginVal" class="text-indigo-400 font-bold">6 px</span>
+                </div>
+                <input id="logoMargin" type="range" min="0" max="25" step="1" value="6" oninput="updateQR()" class="w-full" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Preview & Export -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sticky top-6 space-y-5">
+          <h2 class="text-lg font-bold text-white">المعاينة الحية الصافية</h2>
+
+          <div class="checkerboard rounded-2xl p-6 flex items-center justify-center min-h-[340px] border border-slate-800">
+            <div id="qrCanvasContainer"></div>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1">
+            <span class="text-[11px] text-slate-400 font-semibold block">الرابط الفعلي المشفّر داخل الـ QR:</span>
+            <div id="encodedPreviewText" class="text-xs font-mono text-emerald-400 break-all dir-ltr text-left bg-slate-900 p-2 rounded border border-slate-800"></div>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1.5">دقة الحفظ:</label>
+            <select id="exportSize" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+              <option value="1000">1000 × 1000 بكسل</option>
+              <option value="2000" selected>2000 × 2000 بكسل (للطباعة)</option>
+              <option value="3000">3000 × 3000 بكسل (4K)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="downloadQR('png')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-sm">حفظ PNG</button>
+            <button onclick="downloadQR('svg')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm">حفظ SVG</button>
+            <button onclick="downloadQR('jpeg')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-xl text-sm">حفظ JPG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let uploadedLogoDataUrl = '';
+
+    const qrCode = new QRCodeStyling({
+      width: 300,
+      height: 300,
+      type: 'svg',
+      data: 'https://google.com',
+      margin: 8,
+      qrOptions: { errorCorrectionLevel: 'H' },
+      imageOptions: { hideBackgroundDots: true, imageSize: 0.42, margin: 6, crossOrigin: 'anonymous' }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (new URLSearchParams(window.location.search).get('id')) return;
+
+      // إذا تم فتح الموقع من GitHub Pages، يضع رابطك تلقائياً في خانة الرابط الديناميكي
+      if (window.location.hostname.includes('github.io')) {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        document.getElementById('dynamicBaseUrl').value = cleanUrl;
+        document.getElementById('hostBadge').innerHTML = '✓ متصل تلقائياً بـ GitHub Pages';
+      } else {
+        document.getElementById('dynamicBaseUrl').value = 'https://username.github.io/qr-pro/';
+      }
+
+      qrCode.append(document.getElementById('qrCanvasContainer'));
+      updateQR();
+    });
+
+    function toggleDynamicMode() {
+      const isDynamic = document.getElementById('dynamicToggle').checked;
+      document.getElementById('dynamicConfigBox').classList.toggle('hidden', !isDynamic);
+      document.getElementById('directContentBox').classList.toggle('hidden', isDynamic);
+      updateQR();
+    }
+
+    function getActualPayload() {
+      if (document.getElementById('dynamicToggle').checked) {
+        const base = (document.getElementById('dynamicBaseUrl').value || 'https://username.github.io/qr-pro/').trim().replace(/\/+$/, '');
+        const id = (document.getElementById('dynamicShortId').value || 'PRO-101').trim();
+        return `${base}/?id=${encodeURIComponent(id)}`;
+      }
+      return document.getElementById('qrUrlInput').value.trim() || 'https://google.com';
+    }
+
+    function syncColor(target, val) {
+      document.getElementById(target + 'ColorHex').value = val.toUpperCase();
+      updateQR();
+    }
+
+    function syncHex(target, val) {
+      let clean = val.trim();
+      if (!clean.startsWith('#')) clean = '#' + clean;
+      if (/^#[0-9A-Fa-f]{6}$/.test(clean)) {
+        document.getElementById(target + 'ColorPicker').value = clean;
+        updateQR();
+      }
+    }
+
+    function copyHex(id) {
+      navigator.clipboard.writeText(document.getElementById(id).value);
+    }
+
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => { uploadedLogoDataUrl = ev.target.result; updateQR(); };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLogo() {
+      uploadedLogoDataUrl = '';
+      document.getElementById('logoInput').value = '';
+      updateQR();
+    }
+
+    function updateQR() {
+      const payload = getActualPayload();
+      document.getElementById('encodedPreviewText').textContent = payload;
+
+      const isTransparent = document.getElementById('transparentBg').checked;
+      const logoSize = parseFloat(document.getElementById('logoSize').value);
+      const logoMargin = parseInt(document.getElementById('logoMargin').value, 10);
+
+      document.getElementById('logoSizeVal').textContent = `${Math.round(logoSize * 100)}%`;
+      document.getElementById('logoMarginVal').textContent = `${logoMargin} px`;
+
+      qrCode.update({
+        data: payload,
+        image: uploadedLogoDataUrl || undefined,
+        dotsOptions: {
+          color: document.getElementById('dotsColorPicker').value,
+          type: document.getElementById('dotsType').value
+        },
+        cornersSquareOptions: {
+          color: document.getElementById('cornersColorPicker').value,
+          type: document.getElementById('cornerSquareType').value
+        },
+        cornersDotOptions: {
+          color: document.getElementById('cornersColorPicker').value,
+          type: document.getElementById('cornerDotType').value
+        },
+        backgroundOptions: {
+          color: isTransparent ? 'transparent' : document.getElementById('bgColorPicker').value
+        },
+        imageOptions: {
+          hideBackgroundDots: true,
+          imageSize: logoSize,
+          margin: logoMargin
+        }
+      });
+    }
+
+    async function downloadQR(ext) {
+      const exportSize = parseInt(document.getElementById('exportSize').value, 10);
+      const isTransparent = document.getElementById('transparentBg').checked;
+      const bgColor = document.getElementById('bgColorPicker').value;
+      const finalBg = (ext === 'jpeg' && isTransparent) ? '#ffffff' : (isTransparent ? 'transparent' : bgColor);
+
+      qrCode.update({ width: exportSize, height: exportSize, backgroundOptions: { color: finalBg } });
+      await qrCode.download({ name: 'qr-studio-pro', extension: ext });
+      qrCode.update({ width: 300, height: 300, backgroundOptions: { color: isTransparent ? 'transparent' : bgColor } });
+    }
+  </script>
+</body>
+</html>
