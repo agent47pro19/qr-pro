@@ -18,5 +18,26 @@
     }
   },
   "PDF-1": "https://drive.google.com/file/d/YOUR_FILE_ID/view",
-  "MENU": "https://example.com/menu.pdf"
+  "MENU": "https://example.com/menu.pdf",
+  "QR-127": {
+    "type": "url",
+    "value": "https://www.dropbox.com/scl/fi/o8iwg7ezpnhznjnc83rf6/.pdf?rlkey=g3jk96wrzp8back18ce949pea&st=fuxpylm0&raw=1",
+    "title": "QR-127",
+    "updatedAt": "١٠ نوفمبر ٢٠٢٦، ٠٢:٤٥ ص",
+    "style": {
+      "dotsColor": "#000000",
+      "cornersColor": "#000000",
+      "bgColor": "#ffffff",
+      "transparentBg": false,
+      "dotsType": "square",
+      "cornerSquareType": "square",
+      "cornerDotType": "square",
+      "errorCorrectionLevel": "H",
+      "qrTypeNumber": 0,
+      "qrMargin": 6,
+      "logoSize": 0.43,
+      "logoMargin": 6,
+      "logo": ""
+    }
+  }
 }
