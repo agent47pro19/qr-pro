@@ -93,8 +93,8 @@
                         linear-gradient(-45deg, var(--checker-1) 25%, transparent 25%),
                         linear-gradient(45deg, transparent 75%, var(--checker-1) 75%),
                         linear-gradient(-45deg, transparent 75%, var(--checker-1) 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
     }
     input[type="range"] { accent-color: var(--accent); }
   </style>
@@ -155,7 +155,7 @@
         <h1 class="text-2xl md:text-3xl font-extrabold bg-gradient-to-l from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
           QR Studio Pro — لوحة التحكم الديناميكية المتكاملة
         </h1>
-        <p class="theme-text-muted text-sm mt-1">تعديل المحتوى في أي وقت، تحكم بكثافة النقاط والخطوط، سجل كامل للرموز، وثيمات متعددة</p>
+        <p class="theme-text-muted text-sm mt-1">يحتفظ بكل كيو آر (مع شعاره وألوانه وتصميمه) مرتبطاً بملفه أو رابطه للتعديل في أي وقت</p>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
@@ -190,7 +190,7 @@
         <button onclick="toggleTokenModal()" class="text-xs theme-text-muted hover:opacity-80">إغلاق ✕</button>
       </div>
       <p class="text-xs theme-text-muted leading-relaxed">
-        ضع مفتاح GitHub Token الخاص بك هنا لتتمكن من رفع ملفات الـ PDF وتغيير الروابط والنصوص وحفظ الرموز بضغطة زر:
+        ضع مفتاح GitHub Token الخاص بك هنا لتتمكن من رفع ملفات الـ PDF وتغيير الروابط والنصوص وحفظ الرموز مع تصاميمها بضغطة زر:
       </p>
       <div class="flex flex-wrap gap-2">
         <input id="ghTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
@@ -208,12 +208,12 @@
         <!-- 1. Content & Dynamic Management -->
         <section class="theme-card border rounded-2xl p-6 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="text-lg font-bold text-indigo-400">1. التحكم بالمحتوى (مباشر أو ديناميكي ثابت)</h2>
+            <h2 class="text-lg font-bold text-indigo-400">1. الملف أو الرابط المرتبط بهذا الـ QR</h2>
 
             <!-- Mode Switcher -->
             <div class="flex theme-sub p-1 rounded-xl border">
               <button onclick="setQrMode('dynamic')" id="mode-dynamic" class="px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition">
-                ديناميكي (يتغير محتواه بدون تغير شكله)
+                ديناميكي (يحفظ الـ QR مع ملفه)
               </button>
               <button onclick="setQrMode('direct')" id="mode-direct" class="px-3 py-1.5 rounded-lg text-xs font-bold theme-text-muted transition">
                 عادي مباشر
@@ -226,32 +226,28 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <div class="md:col-span-4">
                 <label class="text-xs theme-text-muted font-semibold block mb-1">كود المعرّف الثابت (ID):</label>
-                <input id="dynamicShortId" type="text" value="PRO-101" oninput="onShortIdChange()"
+                <input id="dynamicShortId" type="text" value="PRO-101" oninput="onShortIdInputManual()"
                   class="w-full theme-card border rounded-lg px-3 py-2 text-sm font-mono text-amber-400 font-bold text-center dir-ltr" />
               </div>
               <div class="md:col-span-5">
-                <label class="text-xs theme-text-muted font-semibold block mb-1">اسم توضيحي للرمز (اختياري لسهولة التذكر):</label>
-                <input id="qrCustomTitle" type="text" placeholder="مثال: ملف كشف الحساب / منيو المطعم"
+                <label class="text-xs theme-text-muted font-semibold block mb-1">اسم الملف / الوصف (لتذكره بسهولة):</label>
+                <input id="qrCustomTitle" type="text" placeholder="مثال: كشف حساب عميل / منيو"
                   class="w-full theme-card border rounded-lg px-3 py-2 text-sm" />
               </div>
               <div class="md:col-span-3">
                 <button onclick="createNewBlankQr()" class="w-full py-2 px-3 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition">
-                  + إنشاء رمز جديد
+                  + إنشاء QR جديد
                 </button>
               </div>
             </div>
 
             <!-- Quick Saved Pills -->
             <div class="pt-1">
-              <label class="text-[11px] theme-text-muted block mb-1">وصول سريع لرموزك المحفوظة:</label>
-              <div id="savedIdsList" class="flex flex-wrap gap-1.5 min-h-[34px] items-center theme-card p-1.5 rounded-lg border">
+              <label class="text-[11px] theme-text-muted block mb-1">اختر أياً من ملفاتك/رموزك المحفوظة لفتح الكيو آر الخاص به وتعديله:</label>
+              <div id="savedIdsList" class="flex flex-wrap gap-1.5 min-h-[36px] items-center theme-card p-1.5 rounded-lg border">
                 <span class="text-xs theme-text-muted px-2">جاري التحميل...</span>
               </div>
             </div>
-
-            <p class="text-[11px] theme-text-muted">
-              📌 طالما أن كود المعرّف الثابت (مثل <code class="text-amber-400 font-bold">PRO-101</code>) لم يتغير، فإن <strong>شكل نقاط الـ QR لن يتغير أبداً</strong> مهما غيرت الرابط أو النص أو ملف الـ PDF!
-            </p>
           </div>
 
           <!-- Content Type Tabs -->
@@ -264,7 +260,7 @@
           <!-- Tab 1: URL Input -->
           <div id="content-url" class="space-y-2">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold block">أدخل الرابط الذي يفتح عند مسح الـ QR:</label>
+              <label class="text-xs font-semibold block">الرابط المرتبط بهذا الكيو آر:</label>
               <button onclick="convertCloudLink('targetUrlInput')" class="text-[11px] text-indigo-400 hover:underline font-semibold">
                 ✨ تحويل رابط Drive/Dropbox لتحميل مباشر
               </button>
@@ -286,7 +282,7 @@
                 </button>
               </div>
               <p id="pdfUploadStatus" class="text-xs theme-text-muted">
-                * للملفات الخاصة أو الضخمة جداً (100MB+) يفضل رفعها على Dropbox أو Google Drive ولصق رابطها بالأسفل لتبقى مخفية عن العامة.
+                * للملفات الخاصة أو الضخمة (100MB+) ارفعها على Dropbox أو Google Drive والصق رابطها بالأسفل لتبقى خاصة.
               </p>
             </div>
 
@@ -304,7 +300,7 @@
 
           <!-- Tab 3: Text Input -->
           <div id="content-text" class="hidden space-y-2">
-            <label class="text-xs font-semibold block">أدخل النص أو الرسالة التي ستظهر لمن يمسح الـ QR:</label>
+            <label class="text-xs font-semibold block">النص أو الرسالة المرتبطة بهذا الكيو آر:</label>
             <textarea id="targetTextInput" rows="3" oninput="onContentInput()" placeholder="اكتب أي نص أو تفاصيل هنا..."
               class="w-full theme-sub border rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
           </div>
@@ -313,7 +309,7 @@
           <div id="saveDynamicBox" class="pt-2">
             <button onclick="saveDynamicLinkToGithub()" id="saveDynamicBtn"
               class="w-full bg-gradient-to-l from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-extrabold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
-              <span>💾 حفظ وتثبيت المحتوى والتصميم لهذا الـ QR (بدون تغير شكله)</span>
+              <span>💾 حفظ هذا الـ QR (بتصميمه وشعاره) مع ملفه في السجل</span>
             </button>
             <p id="saveStatusMsg" class="text-xs text-center mt-2 hidden"></p>
           </div>
@@ -321,7 +317,7 @@
 
         <!-- 2. Colors -->
         <section class="theme-card border rounded-2xl p-6 space-y-5">
-          <h2 class="text-lg font-bold text-indigo-400">2. الألوان (نسخ ولصق HEX) وشفافية الخلفية</h2>
+          <h2 class="text-lg font-bold text-indigo-400">2. الألوان الخاصة بهذا الـ QR (نسخ ولصق HEX)</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="theme-sub p-3.5 rounded-xl border space-y-2">
@@ -360,7 +356,7 @@
 
         <!-- 3. Shapes, Density & Logo -->
         <section class="theme-card border rounded-2xl p-6 space-y-5">
-          <h2 class="text-lg font-bold text-indigo-400">3. شكل الكيو آر، كثافة النقاط والخطوط، وتكبير الشعار</h2>
+          <h2 class="text-lg font-bold text-indigo-400">3. شكل الكيو آر، كثافة النقاط، والشعار الخاص به</h2>
 
           <!-- Shapes -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -392,11 +388,11 @@
             </div>
           </div>
 
-          <!-- Dot & Line Density Controls (NEW) -->
+          <!-- Dot & Line Density Controls -->
           <div class="theme-sub p-4 rounded-xl border space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-bold text-indigo-400">التحكم بكثافة النقاط والخطوط (Dot & Grid Density)</h3>
-              <span class="text-[11px] theme-text-muted">تحكم بنعومة أو ضخامة النقاط</span>
+              <span class="text-[11px] theme-text-muted">يُحفظ تلقائياً مع هذا الكيو آر</span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -416,7 +412,7 @@
                   <span id="densityLevelVal" class="text-indigo-400 font-bold">تلقائي (0)</span>
                 </div>
                 <input id="qrTypeNumber" type="range" min="0" max="20" step="1" value="0" oninput="updateQR()" class="w-full" />
-                <span class="text-[10px] theme-text-muted block">0 = حجم مثالي تلقائي | ارفعه لزيادة كثافة النقاط</span>
+                <span class="text-[10px] theme-text-muted block">0 = تلقائي | ارفعه لزيادة كثافة النقاط</span>
               </div>
 
               <div>
@@ -425,16 +421,19 @@
                   <span id="qrMarginVal" class="text-indigo-400 font-bold">8 px</span>
                 </div>
                 <input id="qrMargin" type="range" min="0" max="35" step="1" value="8" oninput="updateQR()" class="w-full" />
-                <span class="text-[10px] theme-text-muted block">المسافة الفارغة المحيطة بالكيو آر</span>
+                <span class="text-[10px] theme-text-muted block">المسافة المحيطة بالكيو آر</span>
               </div>
             </div>
           </div>
 
-          <!-- Logo Upload & Size -->
+          <!-- Logo Upload & Size (Saved per QR!) -->
           <div class="border-t border-slate-800 pt-4 space-y-4">
             <div class="flex items-center justify-between">
-              <label class="text-sm font-bold">رفع الشعار (Logo) وتكبيره</label>
-              <button onclick="removeLogo()" class="text-xs text-rose-400 bg-rose-950/40 px-3 py-1.5 rounded-lg border border-rose-800/40">حذف الشعار</button>
+              <div class="flex items-center gap-3">
+                <label class="text-sm font-bold">الشعار المرفق مع هذا الـ QR (Logo)</label>
+                <img id="currentLogoThumb" src="" alt="Logo" class="hidden w-8 h-8 rounded-lg object-contain bg-white p-0.5 border border-indigo-500" />
+              </div>
+              <button onclick="removeLogo()" class="text-xs text-rose-400 bg-rose-950/40 px-3 py-1.5 rounded-lg border border-rose-800/40">حذف الشعار من هذا الرمز</button>
             </div>
 
             <input id="logoInput" type="file" accept="image/*" onchange="handleLogoUpload(event)"
@@ -464,8 +463,11 @@
       <div class="lg:col-span-5 space-y-6">
         <div class="theme-card border rounded-2xl p-6 sticky top-6 space-y-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold">المعاينة الحية الصافية</h2>
-            <span class="text-xs text-emerald-400 font-semibold">بدون أي شعارات أو نصوص إضافية</span>
+            <div>
+              <h2 class="text-lg font-bold">الكيو آر الخاص بالملف الحالي</h2>
+              <p id="activeQrBadgeTitle" class="text-xs text-amber-400 font-mono font-bold mt-0.5">الكود النشط: PRO-101</p>
+            </div>
+            <span class="text-xs text-emerald-400 font-semibold">صافي 100%</span>
           </div>
 
           <div class="checkerboard rounded-2xl p-6 flex items-center justify-center min-h-[340px] border border-slate-800">
@@ -499,15 +501,15 @@
       </div>
     </div>
 
-    <!-- 4. Saved / Created QR Codes Management Section (NEW) -->
+    <!-- 4. Saved / Created QR Codes Gallery with Live QR Previews -->
     <section id="savedCodesSection" class="theme-card border rounded-2xl p-6 space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h2 class="text-xl font-extrabold text-indigo-400 flex items-center gap-2">
-            <span>🗂️ سجل الرموز التي تم إنشاؤها (إدارة وتعديل في أي وقت)</span>
+            <span>🗂️ سجل الكيو آر والملفات المحفوظة (كل ملف مع الكيو آر الخاص به)</span>
           </h2>
           <p class="text-xs theme-text-muted mt-1">
-            اختر أي رمز من رموزك السابقة لتعديل رابطه أو ملف الـ PDF أو تصميمه فوراً دون أن يتغير شكل الكيو آر المطبوع
+            اضغط على <strong>"✏️ فتح وتعديل الملف والـ QR"</strong> في أي بطاقة ليتم تحميل الكيو آر الخاص بها (بشعاره وألوانه) في المحرر بالأعلى
           </p>
         </div>
 
@@ -520,8 +522,8 @@
         </div>
       </div>
 
-      <div id="savedCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- Cards injected via JS -->
+      <div id="savedCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Cards with actual QR previews injected via JS -->
       </div>
     </section>
 
@@ -550,7 +552,6 @@
     window.addEventListener('DOMContentLoaded', async () => {
       if (new URLSearchParams(window.location.search).get('id')) return;
 
-      // Load saved theme
       const savedTheme = localStorage.getItem('qr_studio_theme') || 'midnight';
       setTheme(savedTheme);
 
@@ -586,19 +587,15 @@
       document.getElementById('tokenModal').classList.add('hidden');
     }
 
-    // تحويل روابط Google Drive و Dropbox إلى روابط تحميل مباشر مخفية
     function convertCloudLink(inputId) {
       const input = document.getElementById(inputId);
       let url = input.value.trim();
       if (!url) return;
 
-      // Google Drive conversion
       const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
       if (driveMatch && driveMatch[1]) {
         url = `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
-      }
-      // Dropbox conversion
-      else if (url.includes('dropbox.com')) {
+      } else if (url.includes('dropbox.com')) {
         url = url.replace('?dl=0', '?raw=1').replace('&dl=0', '&raw=1');
         if (!url.includes('raw=1') && !url.includes('dl=1')) {
           url += (url.includes('?') ? '&raw=1' : '?raw=1');
@@ -616,7 +613,7 @@
           linksDb = await res.json();
           renderSavedIds();
           renderSavedCards();
-          onShortIdChange();
+          loadEntryIntoEditor(document.getElementById('dynamicShortId').value.trim());
         }
       } catch (e) {
         console.warn('Could not load links.json yet');
@@ -635,19 +632,67 @@
       const currentId = document.getElementById('dynamicShortId').value.trim();
       container.innerHTML = keys.map(k => {
         const entry = linksDb[k];
-        const title = (typeof entry === 'object' && entry.title) ? ` (${entry.title})` : '';
+        const title = (typeof entry === 'object' && entry.title && entry.title !== k) ? ` — ${entry.title}` : '';
         const isActive = k === currentId;
         return `
-          <button onclick="selectShortId('${k}')" class="px-2.5 py-1 rounded-md text-xs font-mono transition ${isActive ? 'theme-btn-accent font-bold' : 'theme-sub hover:opacity-80'}">
-            ${k}${title}
+          <button onclick="selectShortId('${k}')" class="px-3 py-1.5 rounded-lg text-xs font-mono transition flex items-center gap-1 ${isActive ? 'theme-btn-accent font-bold shadow' : 'theme-sub border hover:opacity-80'}">
+            <span>${k}</span>
+            <span class="font-sans text-[11px] opacity-90">${title}</span>
           </button>
         `;
       }).join('');
     }
 
+    // بناء خيارات الكيو آر لأي عنصر محفوظ لعرضه داخل بطاقته الخاصة
+    function buildQrOptionsForSavedItem(k, entry, size = 135) {
+      const s = (typeof entry === 'object' && entry.style) ? entry.style : {};
+      const payload = `${SITE_BASE_URL}/?id=${encodeURIComponent(k)}`;
+      const ecLevel = s.errorCorrectionLevel || 'H';
+      const userDensity = typeof s.qrTypeNumber === 'number' ? s.qrTypeNumber : 0;
+      const byteLength = new TextEncoder().encode(payload).length;
+      const minSafeVersion = Math.min(40, Math.max(1, Math.ceil(byteLength / (ecLevel === 'H' ? 10 : ecLevel === 'Q' ? 14 : 20)) + 2));
+      const finalTypeNumber = userDensity === 0 ? 0 : Math.max(userDensity, minSafeVersion);
+
+      return {
+        width: size,
+        height: size,
+        type: 'svg',
+        data: payload,
+        margin: typeof s.qrMargin === 'number' ? Math.min(s.qrMargin, 10) : 6,
+        image: s.logo || undefined,
+        qrOptions: {
+          errorCorrectionLevel: ecLevel,
+          typeNumber: finalTypeNumber
+        },
+        dotsOptions: {
+          color: s.dotsColor || '#000000',
+          type: s.dotsType || 'rounded'
+        },
+        cornersSquareOptions: {
+          color: s.cornersColor || '#000000',
+          type: s.cornerSquareType || 'extra-rounded'
+        },
+        cornersDotOptions: {
+          color: s.cornersColor || '#000000',
+          type: s.cornerDotType || 'dot'
+        },
+        backgroundOptions: {
+          color: s.transparentBg ? 'transparent' : (s.bgColor || '#ffffff')
+        },
+        imageOptions: {
+          hideBackgroundDots: true,
+          imageSize: typeof s.logoSize === 'number' ? s.logoSize : 0.42,
+          margin: typeof s.logoMargin === 'number' ? Math.min(s.logoMargin, 6) : 4,
+          crossOrigin: 'anonymous'
+        }
+      };
+    }
+
     function renderSavedCards() {
       const grid = document.getElementById('savedCardsGrid');
       const query = (document.getElementById('searchSavedCodes')?.value || '').trim().toLowerCase();
+      const currentActiveId = document.getElementById('dynamicShortId').value.trim();
+
       const keys = Object.keys(linksDb).filter(k => {
         if (!query) return true;
         const entry = linksDb[k];
@@ -665,13 +710,14 @@
         return;
       }
 
-      grid.innerHTML = keys.map(k => {
+      grid.innerHTML = keys.map((k, idx) => {
         const entry = linksDb[k];
         const val = typeof entry === 'string' ? entry : (entry.value || '');
         const type = typeof entry === 'string' ? 'url' : (entry.type || 'url');
-        const title = (typeof entry === 'object' && entry.title) ? entry.title : 'بدون اسم وصفي';
-        const updatedAt = (typeof entry === 'object' && entry.updatedAt) ? entry.updatedAt : 'محفوظ مسبقاً';
-        const dotsColor = (typeof entry === 'object' && entry.style?.dotsColor) ? entry.style.dotsColor : '#6366f1';
+        const title = (typeof entry === 'object' && entry.title) ? entry.title : k;
+        const updatedAt = (typeof entry === 'object' && entry.updatedAt) ? entry.updatedAt : 'محفوظ في السجل';
+        const hasCustomStyle = typeof entry === 'object' && !!entry.style;
+        const isCurrent = k === currentActiveId;
 
         const typeBadge = type === 'pdf'
           ? '<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">📄 ملف PDF</span>'
@@ -679,52 +725,74 @@
             ? '<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-bold">📝 نص</span>'
             : '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">🔗 رابط</span>');
 
-        const fullQrUrl = `${SITE_BASE_URL}/?id=${encodeURIComponent(k)}`;
-
         return `
-          <div class="theme-sub border rounded-2xl p-4 flex flex-col justify-between space-y-4 hover:border-indigo-500/60 transition">
-            <div class="space-y-2.5">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <span class="w-3.5 h-3.5 rounded-full border border-white/20" style="background:${dotsColor}"></span>
-                  <span class="font-mono font-extrabold text-amber-400 text-sm dir-ltr">${k}</span>
+          <div class="theme-sub border ${isCurrent ? 'border-indigo-500 ring-2 ring-indigo-500/30' : ''} rounded-2xl p-4 flex flex-col justify-between space-y-4 transition">
+            <div class="flex gap-3.5 items-start">
+              <!-- Live Mini QR Code Preview for this exact entry -->
+              <div class="checkerboard rounded-xl p-2 border border-slate-800 flex-shrink-0 flex items-center justify-center w-[145px] h-[145px] cursor-pointer"
+                   onclick="editSavedQr('${k}')" title="اضغط لفتح هذا الـ QR وتعديله">
+                <div id="mini-qr-card-${idx}"></div>
+              </div>
+
+              <!-- Entry Info -->
+              <div class="flex-1 min-w-0 space-y-2">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="font-mono font-extrabold text-amber-400 text-xs dir-ltr truncate">${k}</span>
+                  ${typeBadge}
                 </div>
-                ${typeBadge}
-              </div>
 
-              <div class="text-sm font-bold truncate">${title}</div>
+                <div class="text-sm font-bold truncate" title="${title}">${title}</div>
 
-              <div class="theme-card border rounded-lg p-2 text-[11px] font-mono theme-text-muted truncate dir-ltr text-left" title="${val}">
-                ${val}
-              </div>
+                <div class="theme-card border rounded-lg p-2 text-[10px] font-mono theme-text-muted break-all line-clamp-2 dir-ltr text-left" title="${val}">
+                  ${val}
+                </div>
 
-              <div class="text-[10px] theme-text-muted flex items-center justify-between">
-                <span>آخر تحديث: ${updatedAt}</span>
+                <div class="text-[10px] theme-text-muted">
+                  ${hasCustomStyle ? '<span class="text-emerald-400">✓ محفوظ مع تصميمه وشعاره</span>' : '<span>تصميم افتراضي</span>'}
+                  <div class="opacity-75 mt-0.5">${updatedAt}</div>
+                </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
-              <button onclick="editSavedQr('${k}')" class="col-span-2 theme-btn-accent py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
-                <span>✏️ تعديل المحتوى والتصميم</span>
+            <!-- Card Actions -->
+            <div class="grid grid-cols-12 gap-2 pt-2 border-t border-slate-800/80">
+              <button onclick="editSavedQr('${k}')" class="col-span-7 theme-btn-accent py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                <span>✏️ فتح وتعديل الملف والـ QR</span>
               </button>
-              <div class="flex gap-1">
-                <button onclick="copyText('${fullQrUrl}')" title="نسخ رابط الكيو آر" class="flex-1 theme-card border hover:opacity-80 rounded-xl text-xs flex items-center justify-center">
-                  📋
-                </button>
-                <button onclick="deleteSavedQr('${k}')" title="حذف الرمز" class="flex-1 bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-800/40 rounded-xl text-xs flex items-center justify-center">
-                  🗑️
-                </button>
-              </div>
+              <button onclick="downloadCardQr('${k}')" title="تحميل صورة هذا الـ QR مباشرة" class="col-span-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 py-2 rounded-xl text-xs font-bold">
+                ⬇️ PNG
+              </button>
+              <button onclick="deleteSavedQr('${k}')" title="حذف الرمز" class="col-span-2 bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-800/40 py-2 rounded-xl text-xs flex items-center justify-center">
+                🗑️
+              </button>
             </div>
           </div>
         `;
       }).join('');
+
+      // Render each mini QR code inside its card
+      keys.forEach((k, idx) => {
+        const container = document.getElementById(`mini-qr-card-${idx}`);
+        if (container) {
+          const miniQr = new QRCodeStyling(buildQrOptionsForSavedItem(k, linksDb[k], 128));
+          miniQr.append(container);
+        }
+      });
+    }
+
+    async function downloadCardQr(k) {
+      const entry = linksDb[k];
+      if (!entry) return;
+      const exportSize = parseInt(document.getElementById('exportSize').value, 10) || 2000;
+      const tempQr = new QRCodeStyling(buildQrOptionsForSavedItem(k, entry, exportSize));
+      await tempQr.download({ name: `qr-${k}`, extension: 'png' });
     }
 
     function selectShortId(id) {
       document.getElementById('dynamicShortId').value = id;
-      onShortIdChange();
+      loadEntryIntoEditor(id);
       renderSavedIds();
+      renderSavedCards();
     }
 
     function editSavedQr(id) {
@@ -742,10 +810,32 @@
       setContentType('url', false);
       updateQR();
       renderSavedIds();
+      renderSavedCards();
     }
 
-    function onShortIdChange() {
+    function onShortIdInputManual() {
       const id = document.getElementById('dynamicShortId').value.trim();
+      if (linksDb[id]) {
+        loadEntryIntoEditor(id);
+      } else {
+        updateQR();
+      }
+      renderSavedIds();
+    }
+
+    function updateLogoThumbnailUI() {
+      const thumb = document.getElementById('currentLogoThumb');
+      if (uploadedLogoDataUrl) {
+        thumb.src = uploadedLogoDataUrl;
+        thumb.classList.remove('hidden');
+      } else {
+        thumb.src = '';
+        thumb.classList.add('hidden');
+      }
+    }
+
+    // استرجاع الملف + الكيو آر الخاص به (مع شعاره وألوانه وتصميمه) بالكامل في المحرر
+    function loadEntryIntoEditor(id) {
       const entry = linksDb[id];
       if (entry) {
         const val = typeof entry === 'string' ? entry : entry.value;
@@ -758,30 +848,30 @@
         if (type === 'pdf') document.getElementById('pdfUrlInput').value = val;
         if (type === 'text') document.getElementById('targetTextInput').value = val;
 
-        // Restore saved style if available
         if (typeof entry === 'object' && entry.style) {
           const s = entry.style;
-          if (s.dotsColor) {
-            document.getElementById('dotsColorPicker').value = s.dotsColor;
-            document.getElementById('dotsColorHex').value = s.dotsColor.toUpperCase();
-          }
-          if (s.cornersColor) {
-            document.getElementById('cornersColorPicker').value = s.cornersColor;
-            document.getElementById('cornersColorHex').value = s.cornersColor.toUpperCase();
-          }
-          if (s.bgColor) {
-            document.getElementById('bgColorPicker').value = s.bgColor;
-            document.getElementById('bgColorHex').value = s.bgColor.toUpperCase();
-          }
-          if (typeof s.transparentBg === 'boolean') {
-            document.getElementById('transparentBg').checked = s.transparentBg;
-          }
-          if (s.dotsType) document.getElementById('dotsType').value = s.dotsType;
-          if (s.cornerSquareType) document.getElementById('cornerSquareType').value = s.cornerSquareType;
-          if (s.cornerDotType) document.getElementById('cornerDotType').value = s.cornerDotType;
-          if (s.errorCorrectionLevel) document.getElementById('errorCorrectionLevel').value = s.errorCorrectionLevel;
-          if (typeof s.qrTypeNumber !== 'undefined') document.getElementById('qrTypeNumber').value = s.qrTypeNumber;
-          if (typeof s.qrMargin !== 'undefined') document.getElementById('qrMargin').value = s.qrMargin;
+          document.getElementById('dotsColorPicker').value = s.dotsColor || '#000000';
+          document.getElementById('dotsColorHex').value = (s.dotsColor || '#000000').toUpperCase();
+
+          document.getElementById('cornersColorPicker').value = s.cornersColor || '#000000';
+          document.getElementById('cornersColorHex').value = (s.cornersColor || '#000000').toUpperCase();
+
+          document.getElementById('bgColorPicker').value = s.bgColor || '#ffffff';
+          document.getElementById('bgColorHex').value = (s.bgColor || '#ffffff').toUpperCase();
+
+          document.getElementById('transparentBg').checked = !!s.transparentBg;
+          document.getElementById('dotsType').value = s.dotsType || 'rounded';
+          document.getElementById('cornerSquareType').value = s.cornerSquareType || 'extra-rounded';
+          document.getElementById('cornerDotType').value = s.cornerDotType || 'dot';
+          document.getElementById('errorCorrectionLevel').value = s.errorCorrectionLevel || 'H';
+          document.getElementById('qrTypeNumber').value = typeof s.qrTypeNumber === 'number' ? s.qrTypeNumber : 0;
+          document.getElementById('qrMargin').value = typeof s.qrMargin === 'number' ? s.qrMargin : 8;
+          document.getElementById('logoSize').value = typeof s.logoSize === 'number' ? s.logoSize : 0.42;
+          document.getElementById('logoMargin').value = typeof s.logoMargin === 'number' ? s.logoMargin : 6;
+
+          // استرجاع الشعار المرفق مع هذا الكيو آر تحديداً
+          uploadedLogoDataUrl = s.logo || '';
+          updateLogoThumbnailUI();
         }
       }
       updateQR();
@@ -878,7 +968,7 @@
 
         const uploadedUrl = `${SITE_BASE_URL}/${path}`;
         document.getElementById('pdfUrlInput').value = uploadedUrl;
-        status.innerHTML = `<span class="text-emerald-400 font-bold">✓ تم رفع الملف بنجاح! اضغط الآن على زر "حفظ وتثبيت المحتوى" بالأسفل.</span>`;
+        status.innerHTML = `<span class="text-emerald-400 font-bold">✓ تم رفع الملف بنجاح! اضغط الآن على زر "حفظ هذا الـ QR مع ملفه" بالأسفل.</span>`;
         updateQR();
       } catch (err) {
         status.innerHTML = `<span class="text-rose-400">خطأ: ${err.message}</span>`;
@@ -888,6 +978,7 @@
       }
     }
 
+    // حفظ كافة تفاصيل الكيو آر بما في ذلك الشعار وحجمه وألوانه مع الملف
     function getCurrentStyleObject() {
       return {
         dotsColor: document.getElementById('dotsColorPicker').value,
@@ -899,7 +990,10 @@
         cornerDotType: document.getElementById('cornerDotType').value,
         errorCorrectionLevel: document.getElementById('errorCorrectionLevel').value,
         qrTypeNumber: parseInt(document.getElementById('qrTypeNumber').value, 10),
-        qrMargin: parseInt(document.getElementById('qrMargin').value, 10)
+        qrMargin: parseInt(document.getElementById('qrMargin').value, 10),
+        logoSize: parseFloat(document.getElementById('logoSize').value),
+        logoMargin: parseInt(document.getElementById('logoMargin').value, 10),
+        logo: uploadedLogoDataUrl || ''
       };
     }
 
@@ -920,7 +1014,7 @@
       btn.disabled = true;
       msgBox.classList.remove('hidden');
       msgBox.className = 'text-xs text-center mt-2 text-amber-400';
-      msgBox.textContent = 'جاري حفظ المحتوى والتصميم في الموقع...';
+      msgBox.textContent = 'جاري حفظ الكيو آر بتصميمه وشعاره مع الملف...';
 
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/links.json`;
@@ -955,7 +1049,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `Update dynamic QR ${id}`,
+            message: `Save QR and design for ${id}`,
             content: updatedBase64,
             sha: sha
           })
@@ -967,7 +1061,7 @@
         renderSavedIds();
         renderSavedCards();
         msgBox.className = 'text-xs text-center mt-2 text-emerald-400 font-bold';
-        msgBox.textContent = `✓ تم تحديث وحفظ الكود (${id}) مع تصميمه بنجاح!`;
+        msgBox.textContent = `✓ تم حفظ الكود (${id}) مع تصميم الكيو آر وشعاره وملفه بنجاح!`;
         updateQR();
       } catch (err) {
         msgBox.className = 'text-xs text-center mt-2 text-rose-400 font-bold';
@@ -1044,23 +1138,50 @@
       navigator.clipboard.writeText(txt);
     }
 
+    // ضغط ذكي للشعار عند رفعه ليُحفظ بسرعة فائقة داخل links.json مع الكيو آر الخاص به
     function handleLogoUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = ev => { uploadedLogoDataUrl = ev.target.result; updateQR(); };
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 260;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+            else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          uploadedLogoDataUrl = canvas.toDataURL('image/png');
+          updateLogoThumbnailUI();
+          updateQR();
+        };
+        img.src = ev.target.result;
+      };
       reader.readAsDataURL(file);
     }
 
     function removeLogo() {
       uploadedLogoDataUrl = '';
       document.getElementById('logoInput').value = '';
+      updateLogoThumbnailUI();
       updateQR();
     }
 
     function updateQR() {
+      const id = (document.getElementById('dynamicShortId').value || 'PRO-101').trim();
+      const title = document.getElementById('qrCustomTitle').value.trim();
       const payload = getQrEncodedString();
+
       document.getElementById('encodedPreviewText').textContent = payload;
+      document.getElementById('activeQrBadgeTitle').textContent = qrMode === 'dynamic'
+        ? `الكود النشط: ${id}${title ? ' (' + title + ')' : ''}`
+        : 'الوضع العادي المباشر';
 
       if (qrMode === 'dynamic') {
         document.getElementById('currentDestinationPreview').textContent = `يحوّل الزائر حالياً إلى: ${getActiveUserContent()}`;
@@ -1080,7 +1201,6 @@
       document.getElementById('qrMarginVal').textContent = `${qrMargin} px`;
       document.getElementById('densityLevelVal').textContent = userDensity === 0 ? 'تلقائي (0)' : `كثافة (${userDensity})`;
 
-      // حساب ذكي للكثافة لمنع تجاوز سعة النص
       const byteLength = new TextEncoder().encode(payload).length;
       const minSafeVersion = Math.min(40, Math.max(1, Math.ceil(byteLength / (ecLevel === 'H' ? 10 : ecLevel === 'Q' ? 14 : 20)) + 2));
       const finalTypeNumber = userDensity === 0 ? 0 : Math.max(userDensity, minSafeVersion);
