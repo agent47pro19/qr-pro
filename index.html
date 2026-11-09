@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="midnight">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,16 +8,95 @@
   <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Cairo', sans-serif; background-color: #0b1120; color: #f8fafc; }
+    :root, [data-theme="midnight"] {
+      --bg-main: #0b1120;
+      --bg-card: #0f172a;
+      --bg-sub: #020617;
+      --border-color: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --checker-1: #1e293b;
+    }
+    [data-theme="oled"] {
+      --bg-main: #000000;
+      --bg-card: #0a0a0a;
+      --bg-sub: #121212;
+      --border-color: #262626;
+      --text-main: #ffffff;
+      --text-muted: #a3a3a3;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --checker-1: #171717;
+    }
+    [data-theme="emerald"] {
+      --bg-main: #022c22;
+      --bg-card: #064e3b;
+      --bg-sub: #022c22;
+      --border-color: #065f46;
+      --text-main: #ecfdf5;
+      --text-muted: #6ee7b7;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --checker-1: #064e3b;
+    }
+    [data-theme="amethyst"] {
+      --bg-main: #13072e;
+      --bg-card: #1e1042;
+      --bg-sub: #0d0422;
+      --border-color: #3b2075;
+      --text-main: #f5f3ff;
+      --text-muted: #c4b5fd;
+      --accent: #a855f7;
+      --accent-hover: #9333ea;
+      --checker-1: #2e1860;
+    }
+    [data-theme="light"] {
+      --bg-main: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-sub: #f8fafc;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --checker-1: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .theme-card {
+      background-color: var(--bg-card);
+      border-color: var(--border-color);
+    }
+    .theme-sub {
+      background-color: var(--bg-sub);
+      border-color: var(--border-color);
+    }
+    .theme-text-muted {
+      color: var(--text-muted);
+    }
+    .theme-btn-accent {
+      background-color: var(--accent);
+      color: #ffffff;
+    }
+    .theme-btn-accent:hover {
+      background-color: var(--accent-hover);
+    }
     .checkerboard {
-      background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%),
-                        linear-gradient(-45deg, #1e293b 25%, transparent 25%),
-                        linear-gradient(45deg, transparent 75%, #1e293b 75%),
-                        linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+      background-image: linear-gradient(45deg, var(--checker-1) 25%, transparent 25%),
+                        linear-gradient(-45deg, var(--checker-1) 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, var(--checker-1) 75%),
+                        linear-gradient(-45deg, transparent 75%, var(--checker-1) 75%);
       background-size: 20px 20px;
       background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
-    input[type="range"] { accent-color: #6366f1; }
+    input[type="range"] { accent-color: var(--accent); }
   </style>
   <script>
     // نظام التوجيه الفوري عند مسح الكيو آر الديناميكي بالجوال
@@ -53,7 +132,7 @@
 
         if (type === 'text') {
           document.getElementById('spinner').style.display = 'none';
-          document.getElementById('titleText').textContent = 'المحتوى النصي:';
+          document.getElementById('titleText').textContent = (typeof item === 'object' && item.title) ? item.title : 'المحتوى النصي:';
           document.getElementById('contentBox').innerHTML = `
             <div style="background:#1e293b;padding:20px;border-radius:16px;border:1px solid #334155;font-size:16px;line-height:1.8;white-space:pre-wrap;text-align:right;">${value}</div>
           `;
@@ -69,216 +148,299 @@
 </head>
 <body class="min-h-screen p-4 md:p-8">
 
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <header class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-800">
+  <div class="max-w-7xl mx-auto space-y-8">
+    <!-- Header & Theme Switcher -->
+    <header class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b theme-card" style="background:transparent;">
       <div>
         <h1 class="text-2xl md:text-3xl font-extrabold bg-gradient-to-l from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
           QR Studio Pro — لوحة التحكم الديناميكية المتكاملة
         </h1>
-        <p class="text-slate-400 text-sm mt-1">عدل الرابط أو النص أو ارفع ملف PDF من داخل الموقع مباشرة دون تغير شكل الكيو آر</p>
+        <p class="theme-text-muted text-sm mt-1">تعديل المحتوى في أي وقت، تحكم بكثافة النقاط والخطوط، سجل كامل للرموز، وثيمات متعددة</p>
       </div>
-      <button onclick="toggleTokenModal()" id="tokenBtn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
-        <span id="tokenStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-        <span id="tokenStatusText">إعداد مفتاح الحفظ المباشر (GitHub Token)</span>
-      </button>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Theme Selector -->
+        <div class="flex items-center gap-1.5 theme-sub border px-3 py-1.5 rounded-xl">
+          <span class="text-xs theme-text-muted ml-1 font-semibold">الثيم:</span>
+          <button onclick="setTheme('midnight')" title="كحلي داكن" class="w-5 h-5 rounded-full bg-slate-900 border-2 border-indigo-500 hover:scale-110 transition"></button>
+          <button onclick="setTheme('oled')" title="أسود ملكي OLED" class="w-5 h-5 rounded-full bg-black border-2 border-amber-500 hover:scale-110 transition"></button>
+          <button onclick="setTheme('emerald')" title="زمردي داكن" class="w-5 h-5 rounded-full bg-emerald-900 border-2 border-emerald-400 hover:scale-110 transition"></button>
+          <button onclick="setTheme('amethyst')" title="بنفسجي نيون" class="w-5 h-5 rounded-full bg-purple-900 border-2 border-purple-400 hover:scale-110 transition"></button>
+          <button onclick="setTheme('light')" title="نهاري فاتح" class="w-5 h-5 rounded-full bg-white border-2 border-slate-400 hover:scale-110 transition"></button>
+        </div>
+
+        <!-- Saved Codes Jump Button -->
+        <a href="#savedCodesSection" class="theme-sub border text-xs font-bold px-3.5 py-2.5 rounded-xl hover:opacity-90 transition flex items-center gap-1.5">
+          <span>🗂️ رموزي المحفوظة</span>
+          <span id="headerCodesCount" class="px-1.5 py-0.5 text-[10px] rounded-full theme-btn-accent">0</span>
+        </a>
+
+        <!-- GitHub Token Button -->
+        <button onclick="toggleTokenModal()" id="tokenBtn" class="theme-sub border text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
+          <span id="tokenStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+          <span id="tokenStatusText">إعداد مفتاح الحفظ (Token)</span>
+        </button>
+      </div>
     </header>
 
-    <!-- GitHub Token Modal / Box -->
-    <div id="tokenModal" class="hidden mb-6 bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 space-y-3">
+    <!-- GitHub Token Modal -->
+    <div id="tokenModal" class="hidden theme-card border rounded-2xl p-5 space-y-3">
       <div class="flex items-center justify-between">
-        <h3 class="text-sm font-bold text-indigo-300">ربط الحفظ والرفع المباشر من داخل الموقع (يُحفظ في متصفحك فقط)</h3>
-        <button onclick="toggleTokenModal()" class="text-xs text-slate-400 hover:text-white">إغلاق ✕</button>
+        <h3 class="text-sm font-bold text-indigo-400">ربط الحفظ والرفع المباشر من داخل الموقع (يُحفظ في متصفحك فقط)</h3>
+        <button onclick="toggleTokenModal()" class="text-xs theme-text-muted hover:opacity-80">إغلاق ✕</button>
       </div>
-      <p class="text-xs text-slate-400 leading-relaxed">
-        ضع مفتاح GitHub Token الخاص بك هنا لتتمكن من رفع ملفات الـ PDF وتغيير الروابط والنصوص بضغطة زر من داخل هذه الصفحة مباشرة:
+      <p class="text-xs theme-text-muted leading-relaxed">
+        ضع مفتاح GitHub Token الخاص بك هنا لتتمكن من رفع ملفات الـ PDF وتغيير الروابط والنصوص وحفظ الرموز بضغطة زر:
       </p>
       <div class="flex flex-wrap gap-2">
         <input id="ghTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs font-mono dir-ltr text-left" />
-        <button onclick="saveGhToken()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs">
+          class="flex-1 theme-sub border rounded-xl px-4 py-2.5 text-xs font-mono dir-ltr text-left" />
+        <button onclick="saveGhToken()" class="theme-btn-accent font-bold px-6 py-2.5 rounded-xl text-xs">
           حفظ المفتاح وتفعيل التحكم
         </button>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8" id="editorTop">
       <!-- Right Column: Controls -->
       <div class="lg:col-span-7 space-y-6">
 
         <!-- 1. Content & Dynamic Management -->
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+        <section class="theme-card border rounded-2xl p-6 space-y-5">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="text-lg font-bold text-indigo-400">1. التحكم بالمحتوى (مباشر أو ديناميكي ثابت)</h2>
 
             <!-- Mode Switcher -->
-            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-              <button onclick="setQrMode('dynamic')" id="mode-dynamic" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition">
+            <div class="flex theme-sub p-1 rounded-xl border">
+              <button onclick="setQrMode('dynamic')" id="mode-dynamic" class="px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition">
                 ديناميكي (يتغير محتواه بدون تغير شكله)
               </button>
-              <button onclick="setQrMode('direct')" id="mode-direct" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+              <button onclick="setQrMode('direct')" id="mode-direct" class="px-3 py-1.5 rounded-lg text-xs font-bold theme-text-muted transition">
                 عادي مباشر
               </button>
             </div>
           </div>
 
-          <!-- Dynamic ID Selector (Only in Dynamic Mode) -->
-          <div id="dynamicIdSection" class="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-3">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-              <div>
-                <label class="text-xs text-slate-400 font-semibold block mb-1">اختر أو اكتب اسم الكود الثابت (ID):</label>
+          <!-- Dynamic ID & Title Selector -->
+          <div id="dynamicIdSection" class="theme-sub border rounded-xl p-4 space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div class="md:col-span-4">
+                <label class="text-xs theme-text-muted font-semibold block mb-1">كود المعرّف الثابت (ID):</label>
                 <input id="dynamicShortId" type="text" value="PRO-101" oninput="onShortIdChange()"
-                  class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-amber-300 text-center dir-ltr" />
+                  class="w-full theme-card border rounded-lg px-3 py-2 text-sm font-mono text-amber-400 font-bold text-center dir-ltr" />
               </div>
-              <div class="md:col-span-2">
-                <label class="text-xs text-slate-400 block mb-1">أكوادك المحفوظة حالياً في الموقع (اضغط لاختيارها وتعديلها):</label>
-                <div id="savedIdsList" class="flex flex-wrap gap-1.5 min-h-[36px] items-center bg-slate-900 p-1.5 rounded-lg border border-slate-800">
-                  <span class="text-xs text-slate-500 px-2">جاري التحميل...</span>
-                </div>
+              <div class="md:col-span-5">
+                <label class="text-xs theme-text-muted font-semibold block mb-1">اسم توضيحي للرمز (اختياري لسهولة التذكر):</label>
+                <input id="qrCustomTitle" type="text" placeholder="مثال: ملف كشف الحساب / منيو المطعم"
+                  class="w-full theme-card border rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div class="md:col-span-3">
+                <button onclick="createNewBlankQr()" class="w-full py-2 px-3 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                  + إنشاء رمز جديد
+                </button>
               </div>
             </div>
-            <p class="text-[11px] text-slate-400">
-              📌 طالما أن اسم الكود الثابت (مثل <code class="text-amber-300">PRO-101</code>) لم يتغير، فإن <strong>شكل نقاط الـ QR لن يتغير أبداً</strong> مهما غيرت الرابط أو النص أو ملف الـ PDF بالأسفل!
+
+            <!-- Quick Saved Pills -->
+            <div class="pt-1">
+              <label class="text-[11px] theme-text-muted block mb-1">وصول سريع لرموزك المحفوظة:</label>
+              <div id="savedIdsList" class="flex flex-wrap gap-1.5 min-h-[34px] items-center theme-card p-1.5 rounded-lg border">
+                <span class="text-xs theme-text-muted px-2">جاري التحميل...</span>
+              </div>
+            </div>
+
+            <p class="text-[11px] theme-text-muted">
+              📌 طالما أن كود المعرّف الثابت (مثل <code class="text-amber-400 font-bold">PRO-101</code>) لم يتغير، فإن <strong>شكل نقاط الـ QR لن يتغير أبداً</strong> مهما غيرت الرابط أو النص أو ملف الـ PDF!
             </p>
           </div>
 
-          <!-- Content Type Tabs (Always Visible!) -->
-          <div class="grid grid-cols-3 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-            <button onclick="setContentType('url')" id="tab-url" class="py-2 rounded-lg text-xs md:text-sm font-bold bg-indigo-600 text-white transition">🔗 رابط موقع</button>
-            <button onclick="setContentType('pdf')" id="tab-pdf" class="py-2 rounded-lg text-xs md:text-sm font-bold text-slate-400 hover:text-white transition">📄 رفع ملف PDF</button>
-            <button onclick="setContentType('text')" id="tab-text" class="py-2 rounded-lg text-xs md:text-sm font-bold text-slate-400 hover:text-white transition">📝 نص / رسالة</button>
+          <!-- Content Type Tabs -->
+          <div class="grid grid-cols-3 gap-2 theme-sub p-1.5 rounded-xl border">
+            <button onclick="setContentType('url')" id="tab-url" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-btn-accent transition">🔗 رابط موقع / سحابي</button>
+            <button onclick="setContentType('pdf')" id="tab-pdf" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-text-muted transition">📄 رفع ملف PDF</button>
+            <button onclick="setContentType('text')" id="tab-text" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-text-muted transition">📝 نص / رسالة</button>
           </div>
 
           <!-- Tab 1: URL Input -->
           <div id="content-url" class="space-y-2">
-            <label class="text-xs text-slate-300 font-semibold block">أدخل الرابط الذي يفتح عند مسح الـ QR:</label>
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold block">أدخل الرابط الذي يفتح عند مسح الـ QR:</label>
+              <button onclick="convertCloudLink('targetUrlInput')" class="text-[11px] text-indigo-400 hover:underline font-semibold">
+                ✨ تحويل رابط Drive/Dropbox لتحميل مباشر
+              </button>
+            </div>
             <input id="targetUrlInput" type="url" value="https://google.com" oninput="onContentInput()"
               placeholder="https://example.com"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:border-indigo-500 focus:outline-none dir-ltr text-left" />
+              class="w-full theme-sub border rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none dir-ltr text-left" />
           </div>
 
           <!-- Tab 2: PDF Upload & Link -->
-          <div id="content-pdf" class="hidden space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div id="content-pdf" class="hidden space-y-4 theme-sub p-4 rounded-xl border">
             <div class="space-y-2">
-              <label class="text-xs font-bold text-indigo-300 block">الخيار أ: ارفع ملف الـ PDF من جهازك مباشرة إلى الموقع:</label>
+              <label class="text-xs font-bold text-indigo-400 block">الخيار أ: ارفع ملف الـ PDF من جهازك مباشرة:</label>
               <div class="flex flex-wrap items-center gap-2">
                 <input id="pdfFileInput" type="file" accept="application/pdf"
-                  class="flex-1 text-xs text-slate-300 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer bg-slate-900 rounded-lg border border-slate-800 p-1.5" />
+                  class="flex-1 text-xs file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white cursor-pointer theme-card rounded-lg border p-1.5" />
                 <button onclick="uploadPdfToGithub()" id="uploadPdfBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-lg text-xs transition">
                   ⬆️ رفع الملف وربطه بالكود
                 </button>
               </div>
-              <p id="pdfUploadStatus" class="text-xs text-slate-400">
-                * الملفات حتى 25MB تُرفع بضغطة زر هنا مباشرة. للملفات الضخمة (100MB حتى 2000MB) <a href="https://github.com/agent47pro19/qr-pro/releases/new" target="_blank" class="text-indigo-400 underline font-bold">اضغط هنا لرفعها في صفحة الملفات الضخمة</a> ثم الصق رابطها بالأسفل:
+              <p id="pdfUploadStatus" class="text-xs theme-text-muted">
+                * للملفات الخاصة أو الضخمة جداً (100MB+) يفضل رفعها على Dropbox أو Google Drive ولصق رابطها بالأسفل لتبقى مخفية عن العامة.
               </p>
             </div>
 
             <div class="border-t border-slate-800 pt-3 space-y-1.5">
-              <label class="text-xs text-slate-300 font-semibold block">الخيار ب: أو ضع رابط ملف الـ PDF المباشر (يُملأ تلقائياً بعد الرفع):</label>
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold block">الخيار ب: رابط ملف الـ PDF المباشر:</label>
+                <button onclick="convertCloudLink('pdfUrlInput')" class="text-[11px] text-indigo-400 hover:underline font-semibold">
+                  ✨ تحويل Drive/Dropbox لتنزيل فوري
+                </button>
+              </div>
               <input id="pdfUrlInput" type="url" placeholder="https://..." oninput="onContentInput()"
-                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-emerald-300 font-mono dir-ltr text-left" />
+                class="w-full theme-card border rounded-xl px-4 py-2.5 text-xs text-emerald-400 font-mono dir-ltr text-left" />
             </div>
           </div>
 
           <!-- Tab 3: Text Input -->
           <div id="content-text" class="hidden space-y-2">
-            <label class="text-xs text-slate-300 font-semibold block">أدخل النص أو الرسالة التي ستظهر لمن يمسح الـ QR:</label>
+            <label class="text-xs font-semibold block">أدخل النص أو الرسالة التي ستظهر لمن يمسح الـ QR:</label>
             <textarea id="targetTextInput" rows="3" oninput="onContentInput()" placeholder="اكتب أي نص أو تفاصيل هنا..."
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:border-indigo-500 focus:outline-none"></textarea>
+              class="w-full theme-sub border rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
           </div>
 
           <!-- Save Dynamic Changes Button -->
           <div id="saveDynamicBox" class="pt-2">
             <button onclick="saveDynamicLinkToGithub()" id="saveDynamicBtn"
               class="w-full bg-gradient-to-l from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-extrabold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
-              <span>💾 حفظ وتثبيت المحتوى الجديد لهذا الـ QR (بدون تغير شكله)</span>
+              <span>💾 حفظ وتثبيت المحتوى والتصميم لهذا الـ QR (بدون تغير شكله)</span>
             </button>
             <p id="saveStatusMsg" class="text-xs text-center mt-2 hidden"></p>
           </div>
         </section>
 
         <!-- 2. Colors -->
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+        <section class="theme-card border rounded-2xl p-6 space-y-5">
           <h2 class="text-lg font-bold text-indigo-400">2. الألوان (نسخ ولصق HEX) وشفافية الخلفية</h2>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-              <label class="text-xs text-slate-400 font-semibold block">لون نقاط الـ QR</label>
+            <div class="theme-sub p-3.5 rounded-xl border space-y-2">
+              <label class="text-xs theme-text-muted font-semibold block">لون نقاط الـ QR</label>
               <div class="flex items-center gap-2">
                 <input id="dotsColorPicker" type="color" value="#000000" oninput="syncColor('dots', this.value)" class="w-9 h-9 rounded cursor-pointer bg-transparent border-0" />
-                <input id="dotsColorHex" type="text" value="#000000" oninput="syncHex('dots', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
-                <button onclick="copyHex('dotsColorHex')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs">نسخ</button>
+                <input id="dotsColorHex" type="text" value="#000000" oninput="syncHex('dots', this.value)" class="w-full theme-card border rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
+                <button onclick="copyHex('dotsColorHex')" class="px-2 py-1.5 theme-card border hover:opacity-80 rounded-lg text-xs">نسخ</button>
               </div>
             </div>
 
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-              <label class="text-xs text-slate-400 font-semibold block">لون إطارات الزوايا</label>
+            <div class="theme-sub p-3.5 rounded-xl border space-y-2">
+              <label class="text-xs theme-text-muted font-semibold block">لون إطارات الزوايا</label>
               <div class="flex items-center gap-2">
                 <input id="cornersColorPicker" type="color" value="#000000" oninput="syncColor('corners', this.value)" class="w-9 h-9 rounded cursor-pointer bg-transparent border-0" />
-                <input id="cornersColorHex" type="text" value="#000000" oninput="syncHex('corners', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
-                <button onclick="copyHex('cornersColorHex')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs">نسخ</button>
+                <input id="cornersColorHex" type="text" value="#000000" oninput="syncHex('corners', this.value)" class="w-full theme-card border rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
+                <button onclick="copyHex('cornersColorHex')" class="px-2 py-1.5 theme-card border hover:opacity-80 rounded-lg text-xs">نسخ</button>
               </div>
             </div>
 
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-              <label class="text-xs text-slate-400 font-semibold block">لون الخلفية</label>
+            <div class="theme-sub p-3.5 rounded-xl border space-y-2">
+              <label class="text-xs theme-text-muted font-semibold block">لون الخلفية</label>
               <div class="flex items-center gap-2">
                 <input id="bgColorPicker" type="color" value="#ffffff" oninput="syncColor('bg', this.value)" class="w-9 h-9 rounded cursor-pointer bg-transparent border-0" />
-                <input id="bgColorHex" type="text" value="#FFFFFF" oninput="syncHex('bg', this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
-                <button onclick="copyHex('bgColorHex')" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs">نسخ</button>
+                <input id="bgColorHex" type="text" value="#FFFFFF" oninput="syncHex('bg', this.value)" class="w-full theme-card border rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase dir-ltr text-left" />
+                <button onclick="copyHex('bgColorHex')" class="px-2 py-1.5 theme-card border hover:opacity-80 rounded-lg text-xs">نسخ</button>
               </div>
             </div>
           </div>
 
-          <label class="flex items-center gap-2 cursor-pointer text-sm text-slate-200 font-semibold pt-2">
+          <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold pt-2">
             <input id="transparentBg" type="checkbox" onchange="updateQR()" class="w-4 h-4 accent-indigo-600 rounded" />
             <span>بدون مربع خلفية (خلفية شفافة بالكامل)</span>
           </label>
         </section>
 
-        <!-- 3. Shapes & Logo -->
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
-          <h2 class="text-lg font-bold text-indigo-400">3. شكل الكيو آر وتكبير الشعار</h2>
+        <!-- 3. Shapes, Density & Logo -->
+        <section class="theme-card border rounded-2xl p-6 space-y-5">
+          <h2 class="text-lg font-bold text-indigo-400">3. شكل الكيو آر، كثافة النقاط والخطوط، وتكبير الشعار</h2>
 
+          <!-- Shapes -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="text-xs text-slate-400 block mb-1">شكل النقاط:</label>
-              <select id="dotsType" onchange="updateQR()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
-                <option value="square">مربعات (Square)</option>
+              <label class="text-xs theme-text-muted block mb-1">شكل النقاط والخطوط:</label>
+              <select id="dotsType" onchange="updateQR()" class="w-full theme-sub border rounded-xl px-3 py-2.5 text-sm">
+                <option value="square">مربعات كلاسيكية (Square)</option>
                 <option value="rounded" selected>حواف ناعمة (Rounded)</option>
-                <option value="dots">دوائر (Dots)</option>
-                <option value="classy">أنيق (Classy)</option>
-                <option value="classy-rounded">أنيق دائري</option>
-                <option value="extra-rounded">دائري فائق</option>
+                <option value="dots">نقاط دائرية (Dots)</option>
+                <option value="classy">خطوط أنيقة (Classy)</option>
+                <option value="classy-rounded">خطوط أنيقة ناعمة</option>
+                <option value="extra-rounded">انسيابي فائق</option>
               </select>
             </div>
             <div>
-              <label class="text-xs text-slate-400 block mb-1">إطار الزاوية الخارجي:</label>
-              <select id="cornerSquareType" onchange="updateQR()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+              <label class="text-xs theme-text-muted block mb-1">إطار الزاوية الخارجي:</label>
+              <select id="cornerSquareType" onchange="updateQR()" class="w-full theme-sub border rounded-xl px-3 py-2.5 text-sm">
                 <option value="square">مربع حاد</option>
                 <option value="extra-rounded" selected>مربع دائري ناعم</option>
-                <option value="dot">دائري</option>
+                <option value="dot">دائري بالكامل</option>
               </select>
             </div>
             <div>
-              <label class="text-xs text-slate-400 block mb-1">نقطة الزاوية الداخلية:</label>
-              <select id="cornerDotType" onchange="updateQR()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+              <label class="text-xs theme-text-muted block mb-1">نقطة الزاوية الداخلية:</label>
+              <select id="cornerDotType" onchange="updateQR()" class="w-full theme-sub border rounded-xl px-3 py-2.5 text-sm">
                 <option value="square">مربع</option>
                 <option value="dot" selected>دائرة</option>
               </select>
             </div>
           </div>
 
+          <!-- Dot & Line Density Controls (NEW) -->
+          <div class="theme-sub p-4 rounded-xl border space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-indigo-400">التحكم بكثافة النقاط والخطوط (Dot & Grid Density)</h3>
+              <span class="text-[11px] theme-text-muted">تحكم بنعومة أو ضخامة النقاط</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="text-xs theme-text-muted block mb-1">مستوى كثافة التصحيح:</label>
+                <select id="errorCorrectionLevel" onchange="updateQR()" class="w-full theme-card border rounded-xl px-3 py-2 text-xs font-bold">
+                  <option value="L">خفيف (L) — نقاط أقل وأكبر</option>
+                  <option value="M">متوسط (M) — متوازن وناعم</option>
+                  <option value="Q">عالي (Q) — كثافة متوسطة</option>
+                  <option value="H" selected>فائق (H) — كثيف (مثالي للشعارات)</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="theme-text-muted">دقة وكثافة الشبكة:</span>
+                  <span id="densityLevelVal" class="text-indigo-400 font-bold">تلقائي (0)</span>
+                </div>
+                <input id="qrTypeNumber" type="range" min="0" max="20" step="1" value="0" oninput="updateQR()" class="w-full" />
+                <span class="text-[10px] theme-text-muted block">0 = حجم مثالي تلقائي | ارفعه لزيادة كثافة النقاط</span>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="theme-text-muted">الهامش الخارجي:</span>
+                  <span id="qrMarginVal" class="text-indigo-400 font-bold">8 px</span>
+                </div>
+                <input id="qrMargin" type="range" min="0" max="35" step="1" value="8" oninput="updateQR()" class="w-full" />
+                <span class="text-[10px] theme-text-muted block">المسافة الفارغة المحيطة بالكيو آر</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo Upload & Size -->
           <div class="border-t border-slate-800 pt-4 space-y-4">
             <div class="flex items-center justify-between">
-              <label class="text-sm font-bold text-white">رفع الشعار (Logo) وتكبيره</label>
+              <label class="text-sm font-bold">رفع الشعار (Logo) وتكبيره</label>
               <button onclick="removeLogo()" class="text-xs text-rose-400 bg-rose-950/40 px-3 py-1.5 rounded-lg border border-rose-800/40">حذف الشعار</button>
             </div>
 
             <input id="logoInput" type="file" accept="image/*" onchange="handleLogoUpload(event)"
-              class="block w-full text-xs text-slate-300 file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white cursor-pointer bg-slate-950 rounded-xl border border-slate-800 p-2" />
+              class="block w-full text-xs file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white cursor-pointer theme-sub rounded-xl border p-2" />
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 theme-sub p-4 rounded-xl border">
               <div>
                 <div class="flex justify-between text-xs mb-1">
                   <span>حجم الشعار:</span>
@@ -300,9 +462,9 @@
 
       <!-- Left Column: Live Preview & Export -->
       <div class="lg:col-span-5 space-y-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sticky top-6 space-y-5">
+        <div class="theme-card border rounded-2xl p-6 sticky top-6 space-y-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-white">المعاينة الحية الصافية</h2>
+            <h2 class="text-lg font-bold">المعاينة الحية الصافية</h2>
             <span class="text-xs text-emerald-400 font-semibold">بدون أي شعارات أو نصوص إضافية</span>
           </div>
 
@@ -310,29 +472,59 @@
             <div id="qrCanvasContainer"></div>
           </div>
 
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
-            <span class="text-[11px] text-slate-400 font-semibold block">الرابط الثابت المشفّر داخل الـ QR:</span>
-            <div id="encodedPreviewText" class="text-xs font-mono text-emerald-400 break-all dir-ltr text-left bg-slate-900 p-2 rounded border border-slate-800"></div>
-            <div id="currentDestinationPreview" class="text-[11px] text-indigo-300 pt-1"></div>
+          <div class="theme-sub border rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] theme-text-muted font-semibold">الرابط الثابت المشفّر داخل الـ QR:</span>
+              <button onclick="copyText(document.getElementById('encodedPreviewText').textContent)" class="text-[11px] text-indigo-400 hover:underline">نسخ الرابط</button>
+            </div>
+            <div id="encodedPreviewText" class="text-xs font-mono text-emerald-400 break-all dir-ltr text-left theme-card p-2 rounded border"></div>
+            <div id="currentDestinationPreview" class="text-[11px] text-indigo-400 pt-1 break-all"></div>
           </div>
 
           <div>
-            <label class="text-xs text-slate-400 block mb-1.5">دقة الحفظ:</label>
-            <select id="exportSize" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm">
+            <label class="text-xs theme-text-muted block mb-1.5">دقة الحفظ:</label>
+            <select id="exportSize" class="w-full theme-sub border rounded-xl px-3 py-2.5 text-sm">
               <option value="1000">1000 × 1000 بكسل</option>
-              <option value="2000" selected>2000 × 2000 بكسل (للطباعة)</option>
-              <option value="3000">3000 × 3000 بكسل (4K)</option>
+              <option value="2000" selected>2000 × 2000 بكسل (للطباعة الاحترافية)</option>
+              <option value="3000">3000 × 3000 بكسل (فائق الدقة 4K)</option>
             </select>
           </div>
 
           <div class="grid grid-cols-3 gap-3">
-            <button onclick="downloadQR('png')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-sm">حفظ PNG</button>
-            <button onclick="downloadQR('svg')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm">حفظ SVG</button>
-            <button onclick="downloadQR('jpeg')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-xl text-sm">حفظ JPG</button>
+            <button onclick="downloadQR('png')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-sm transition">حفظ PNG</button>
+            <button onclick="downloadQR('svg')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm transition">حفظ SVG</button>
+            <button onclick="downloadQR('jpeg')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-xl text-sm transition">حفظ JPG</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- 4. Saved / Created QR Codes Management Section (NEW) -->
+    <section id="savedCodesSection" class="theme-card border rounded-2xl p-6 space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-indigo-400 flex items-center gap-2">
+            <span>🗂️ سجل الرموز التي تم إنشاؤها (إدارة وتعديل في أي وقت)</span>
+          </h2>
+          <p class="text-xs theme-text-muted mt-1">
+            اختر أي رمز من رموزك السابقة لتعديل رابطه أو ملف الـ PDF أو تصميمه فوراً دون أن يتغير شكل الكيو آر المطبوع
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="searchSavedCodes" type="text" oninput="renderSavedCards()" placeholder="🔍 ابحث بالاسم أو المعرّف..."
+            class="theme-sub border rounded-xl px-3.5 py-2 text-xs w-56 focus:outline-none focus:border-indigo-500" />
+          <button onclick="loadLinksFromRepo()" class="theme-sub border hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold">
+            🔄 تحديث القائمة
+          </button>
+        </div>
+      </div>
+
+      <div id="savedCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Cards injected via JS -->
+      </div>
+    </section>
+
   </div>
 
   <script>
@@ -351,18 +543,27 @@
       type: 'svg',
       data: `${SITE_BASE_URL}/?id=PRO-101`,
       margin: 8,
-      qrOptions: { errorCorrectionLevel: 'H' },
+      qrOptions: { errorCorrectionLevel: 'H', typeNumber: 0 },
       imageOptions: { hideBackgroundDots: true, imageSize: 0.42, margin: 6, crossOrigin: 'anonymous' }
     });
 
     window.addEventListener('DOMContentLoaded', async () => {
       if (new URLSearchParams(window.location.search).get('id')) return;
 
+      // Load saved theme
+      const savedTheme = localStorage.getItem('qr_studio_theme') || 'midnight';
+      setTheme(savedTheme);
+
       qrCode.append(document.getElementById('qrCanvasContainer'));
       checkStoredToken();
       await loadLinksFromRepo();
       updateQR();
     });
+
+    function setTheme(themeName) {
+      document.documentElement.setAttribute('data-theme', themeName);
+      localStorage.setItem('qr_studio_theme', themeName);
+    }
 
     function toggleTokenModal() {
       document.getElementById('tokenModal').classList.toggle('hidden');
@@ -385,12 +586,36 @@
       document.getElementById('tokenModal').classList.add('hidden');
     }
 
+    // تحويل روابط Google Drive و Dropbox إلى روابط تحميل مباشر مخفية
+    function convertCloudLink(inputId) {
+      const input = document.getElementById(inputId);
+      let url = input.value.trim();
+      if (!url) return;
+
+      // Google Drive conversion
+      const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (driveMatch && driveMatch[1]) {
+        url = `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+      }
+      // Dropbox conversion
+      else if (url.includes('dropbox.com')) {
+        url = url.replace('?dl=0', '?raw=1').replace('&dl=0', '&raw=1');
+        if (!url.includes('raw=1') && !url.includes('dl=1')) {
+          url += (url.includes('?') ? '&raw=1' : '?raw=1');
+        }
+      }
+
+      input.value = url;
+      updateQR();
+    }
+
     async function loadLinksFromRepo() {
       try {
         const res = await fetch('./links.json?t=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           linksDb = await res.json();
           renderSavedIds();
+          renderSavedCards();
           onShortIdChange();
         }
       } catch (e) {
@@ -401,20 +626,122 @@
     function renderSavedIds() {
       const container = document.getElementById('savedIdsList');
       const keys = Object.keys(linksDb);
+      document.getElementById('headerCodesCount').textContent = keys.length;
+
       if (!keys.length) {
-        container.innerHTML = '<span class="text-xs text-slate-500 px-2">لا توجد أكواد محفوظة</span>';
+        container.innerHTML = '<span class="text-xs theme-text-muted px-2">لا توجد أكواد محفوظة</span>';
         return;
       }
-      container.innerHTML = keys.map(k => `
-        <button onclick="selectShortId('${k}')" class="px-2.5 py-1 rounded-md text-xs font-mono bg-slate-800 hover:bg-indigo-600 text-slate-200 transition">
-          ${k}
-        </button>
-      `).join('');
+      const currentId = document.getElementById('dynamicShortId').value.trim();
+      container.innerHTML = keys.map(k => {
+        const entry = linksDb[k];
+        const title = (typeof entry === 'object' && entry.title) ? ` (${entry.title})` : '';
+        const isActive = k === currentId;
+        return `
+          <button onclick="selectShortId('${k}')" class="px-2.5 py-1 rounded-md text-xs font-mono transition ${isActive ? 'theme-btn-accent font-bold' : 'theme-sub hover:opacity-80'}">
+            ${k}${title}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderSavedCards() {
+      const grid = document.getElementById('savedCardsGrid');
+      const query = (document.getElementById('searchSavedCodes')?.value || '').trim().toLowerCase();
+      const keys = Object.keys(linksDb).filter(k => {
+        if (!query) return true;
+        const entry = linksDb[k];
+        const val = typeof entry === 'string' ? entry : (entry.value || '');
+        const title = typeof entry === 'object' ? (entry.title || '') : '';
+        return k.toLowerCase().includes(query) || val.toLowerCase().includes(query) || title.toLowerCase().includes(query);
+      });
+
+      if (!keys.length) {
+        grid.innerHTML = `
+          <div class="col-span-full theme-sub border rounded-xl p-8 text-center theme-text-muted text-sm">
+            لا توجد رموز مطابقة للبحث.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = keys.map(k => {
+        const entry = linksDb[k];
+        const val = typeof entry === 'string' ? entry : (entry.value || '');
+        const type = typeof entry === 'string' ? 'url' : (entry.type || 'url');
+        const title = (typeof entry === 'object' && entry.title) ? entry.title : 'بدون اسم وصفي';
+        const updatedAt = (typeof entry === 'object' && entry.updatedAt) ? entry.updatedAt : 'محفوظ مسبقاً';
+        const dotsColor = (typeof entry === 'object' && entry.style?.dotsColor) ? entry.style.dotsColor : '#6366f1';
+
+        const typeBadge = type === 'pdf'
+          ? '<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">📄 ملف PDF</span>'
+          : (type === 'text'
+            ? '<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-bold">📝 نص</span>'
+            : '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">🔗 رابط</span>');
+
+        const fullQrUrl = `${SITE_BASE_URL}/?id=${encodeURIComponent(k)}`;
+
+        return `
+          <div class="theme-sub border rounded-2xl p-4 flex flex-col justify-between space-y-4 hover:border-indigo-500/60 transition">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-3.5 h-3.5 rounded-full border border-white/20" style="background:${dotsColor}"></span>
+                  <span class="font-mono font-extrabold text-amber-400 text-sm dir-ltr">${k}</span>
+                </div>
+                ${typeBadge}
+              </div>
+
+              <div class="text-sm font-bold truncate">${title}</div>
+
+              <div class="theme-card border rounded-lg p-2 text-[11px] font-mono theme-text-muted truncate dir-ltr text-left" title="${val}">
+                ${val}
+              </div>
+
+              <div class="text-[10px] theme-text-muted flex items-center justify-between">
+                <span>آخر تحديث: ${updatedAt}</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
+              <button onclick="editSavedQr('${k}')" class="col-span-2 theme-btn-accent py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                <span>✏️ تعديل المحتوى والتصميم</span>
+              </button>
+              <div class="flex gap-1">
+                <button onclick="copyText('${fullQrUrl}')" title="نسخ رابط الكيو آر" class="flex-1 theme-card border hover:opacity-80 rounded-xl text-xs flex items-center justify-center">
+                  📋
+                </button>
+                <button onclick="deleteSavedQr('${k}')" title="حذف الرمز" class="flex-1 bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-800/40 rounded-xl text-xs flex items-center justify-center">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function selectShortId(id) {
       document.getElementById('dynamicShortId').value = id;
       onShortIdChange();
+      renderSavedIds();
+    }
+
+    function editSavedQr(id) {
+      setQrMode('dynamic');
+      selectShortId(id);
+      document.getElementById('editorTop').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function createNewBlankQr() {
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      const newId = `QR-${randomNum}`;
+      document.getElementById('dynamicShortId').value = newId;
+      document.getElementById('qrCustomTitle').value = '';
+      document.getElementById('targetUrlInput').value = 'https://';
+      setContentType('url', false);
+      updateQR();
+      renderSavedIds();
     }
 
     function onShortIdChange() {
@@ -423,10 +750,39 @@
       if (entry) {
         const val = typeof entry === 'string' ? entry : entry.value;
         const type = typeof entry === 'string' ? 'url' : (entry.type || 'url');
+        const title = (typeof entry === 'object' && entry.title) ? entry.title : '';
+
+        document.getElementById('qrCustomTitle').value = title;
         setContentType(type, false);
         if (type === 'url') document.getElementById('targetUrlInput').value = val;
         if (type === 'pdf') document.getElementById('pdfUrlInput').value = val;
         if (type === 'text') document.getElementById('targetTextInput').value = val;
+
+        // Restore saved style if available
+        if (typeof entry === 'object' && entry.style) {
+          const s = entry.style;
+          if (s.dotsColor) {
+            document.getElementById('dotsColorPicker').value = s.dotsColor;
+            document.getElementById('dotsColorHex').value = s.dotsColor.toUpperCase();
+          }
+          if (s.cornersColor) {
+            document.getElementById('cornersColorPicker').value = s.cornersColor;
+            document.getElementById('cornersColorHex').value = s.cornersColor.toUpperCase();
+          }
+          if (s.bgColor) {
+            document.getElementById('bgColorPicker').value = s.bgColor;
+            document.getElementById('bgColorHex').value = s.bgColor.toUpperCase();
+          }
+          if (typeof s.transparentBg === 'boolean') {
+            document.getElementById('transparentBg').checked = s.transparentBg;
+          }
+          if (s.dotsType) document.getElementById('dotsType').value = s.dotsType;
+          if (s.cornerSquareType) document.getElementById('cornerSquareType').value = s.cornerSquareType;
+          if (s.cornerDotType) document.getElementById('cornerDotType').value = s.cornerDotType;
+          if (s.errorCorrectionLevel) document.getElementById('errorCorrectionLevel').value = s.errorCorrectionLevel;
+          if (typeof s.qrTypeNumber !== 'undefined') document.getElementById('qrTypeNumber').value = s.qrTypeNumber;
+          if (typeof s.qrMargin !== 'undefined') document.getElementById('qrMargin').value = s.qrMargin;
+        }
       }
       updateQR();
     }
@@ -434,11 +790,11 @@
     function setQrMode(mode) {
       qrMode = mode;
       document.getElementById('mode-dynamic').className = mode === 'dynamic'
-        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition'
-        : 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+        ? 'px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition'
+        : 'px-3 py-1.5 rounded-lg text-xs font-bold theme-text-muted transition';
       document.getElementById('mode-direct').className = mode === 'direct'
-        ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white transition'
-        : 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+        ? 'px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition'
+        : 'px-3 py-1.5 rounded-lg text-xs font-bold theme-text-muted transition';
 
       document.getElementById('dynamicIdSection').classList.toggle('hidden', mode !== 'dynamic');
       document.getElementById('saveDynamicBox').classList.toggle('hidden', mode !== 'dynamic');
@@ -450,8 +806,8 @@
       ['url', 'pdf', 'text'].forEach(t => {
         document.getElementById('content-' + t).classList.toggle('hidden', t !== type);
         document.getElementById('tab-' + t).className = (t === type)
-          ? 'py-2 rounded-lg text-xs md:text-sm font-bold bg-indigo-600 text-white transition'
-          : 'py-2 rounded-lg text-xs md:text-sm font-bold text-slate-400 hover:text-white transition';
+          ? 'py-2 rounded-lg text-xs md:text-sm font-bold theme-btn-accent transition'
+          : 'py-2 rounded-lg text-xs md:text-sm font-bold theme-text-muted transition';
       });
       if (triggerUpdate) updateQR();
     }
@@ -475,12 +831,11 @@
       return getActiveUserContent();
     }
 
-    // رفع ملف PDF من داخل الموقع مباشرة إلى GitHub
     async function uploadPdfToGithub() {
       const token = localStorage.getItem('gh_qr_token');
       if (!token) {
         document.getElementById('tokenModal').classList.remove('hidden');
-        alert('يرجى إدخال مفتاح GitHub Token أولاً في الخانة العلوية لتتمكن من رفع الملفات مباشرة من الموقع.');
+        alert('يرجى إدخال مفتاح GitHub Token أولاً في الخانة العلوية.');
         return;
       }
 
@@ -523,7 +878,7 @@
 
         const uploadedUrl = `${SITE_BASE_URL}/${path}`;
         document.getElementById('pdfUrlInput').value = uploadedUrl;
-        status.innerHTML = `<span class="text-emerald-400 font-bold">✓ تم رفع الملف بنجاح! اضغط الآن على زر "حفظ وتثبيت المحتوى الجديد" بالأسفل.</span>`;
+        status.innerHTML = `<span class="text-emerald-400 font-bold">✓ تم رفع الملف بنجاح! اضغط الآن على زر "حفظ وتثبيت المحتوى" بالأسفل.</span>`;
         updateQR();
       } catch (err) {
         status.innerHTML = `<span class="text-rose-400">خطأ: ${err.message}</span>`;
@@ -533,24 +888,39 @@
       }
     }
 
-    // حفظ الرابط أو النص أو الـ PDF الجديد داخل links.json من الموقع مباشرة
+    function getCurrentStyleObject() {
+      return {
+        dotsColor: document.getElementById('dotsColorPicker').value,
+        cornersColor: document.getElementById('cornersColorPicker').value,
+        bgColor: document.getElementById('bgColorPicker').value,
+        transparentBg: document.getElementById('transparentBg').checked,
+        dotsType: document.getElementById('dotsType').value,
+        cornerSquareType: document.getElementById('cornerSquareType').value,
+        cornerDotType: document.getElementById('cornerDotType').value,
+        errorCorrectionLevel: document.getElementById('errorCorrectionLevel').value,
+        qrTypeNumber: parseInt(document.getElementById('qrTypeNumber').value, 10),
+        qrMargin: parseInt(document.getElementById('qrMargin').value, 10)
+      };
+    }
+
     async function saveDynamicLinkToGithub() {
       const token = localStorage.getItem('gh_qr_token');
       if (!token) {
         document.getElementById('tokenModal').classList.remove('hidden');
-        alert('اضغط على زر "إعداد مفتاح الحفظ المباشر" في أعلى الصفحة وضع مفتاح GitHub Token مرة واحدة لتتمكن من الحفظ المباشر.');
+        alert('اضغط على زر "إعداد مفتاح الحفظ" في أعلى الصفحة وضع مفتاح GitHub Token.');
         return;
       }
 
       const id = (document.getElementById('dynamicShortId').value || 'PRO-101').trim();
+      const title = document.getElementById('qrCustomTitle').value.trim();
       const val = getActiveUserContent();
       const msgBox = document.getElementById('saveStatusMsg');
       const btn = document.getElementById('saveDynamicBtn');
 
       btn.disabled = true;
       msgBox.classList.remove('hidden');
-      msgBox.className = 'text-xs text-center mt-2 text-amber-300';
-      msgBox.textContent = 'جاري حفظ وتحديث المحتوى في الموقع...';
+      msgBox.className = 'text-xs text-center mt-2 text-amber-400';
+      msgBox.textContent = 'جاري حفظ المحتوى والتصميم في الموقع...';
 
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/links.json`;
@@ -566,7 +936,15 @@
           currentJson = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
         }
 
-        currentJson[id] = (contentType === 'url') ? val : { type: contentType, value: val };
+        const nowStr = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        currentJson[id] = {
+          type: contentType,
+          value: val,
+          title: title || id,
+          updatedAt: nowStr,
+          style: getCurrentStyleObject()
+        };
 
         const updatedBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentJson, null, 2))));
 
@@ -587,14 +965,60 @@
 
         linksDb = currentJson;
         renderSavedIds();
+        renderSavedCards();
         msgBox.className = 'text-xs text-center mt-2 text-emerald-400 font-bold';
-        msgBox.textContent = `✓ تم تحديث محتوى الكود (${id}) بنجاح! جرب مسح نفس الـ QR بجوالك الآن.`;
+        msgBox.textContent = `✓ تم تحديث وحفظ الكود (${id}) مع تصميمه بنجاح!`;
         updateQR();
       } catch (err) {
         msgBox.className = 'text-xs text-center mt-2 text-rose-400 font-bold';
         msgBox.textContent = `خطأ أثناء الحفظ: ${err.message}`;
       } finally {
         btn.disabled = false;
+      }
+    }
+
+    async function deleteSavedQr(id) {
+      if (!confirm(`هل أنت متأكد من حذف الرمز (${id}) نهائياً؟`)) return;
+
+      const token = localStorage.getItem('gh_qr_token');
+      if (!token) {
+        document.getElementById('tokenModal').classList.remove('hidden');
+        alert('يرجى إدخال مفتاح GitHub Token أولاً للحذف.');
+        return;
+      }
+
+      try {
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/links.json`;
+        const getRes = await fetch(apiUrl, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+
+        if (!getRes.ok) throw new Error('تعذر جلب ملف الروابط');
+        const fileData = await getRes.json();
+        const currentJson = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
+
+        delete currentJson[id];
+
+        const updatedBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentJson, null, 2))));
+        const putRes = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Delete QR ${id}`,
+            content: updatedBase64,
+            sha: fileData.sha
+          })
+        });
+
+        if (!putRes.ok) throw new Error('تعذر حذف الرمز');
+        linksDb = currentJson;
+        renderSavedIds();
+        renderSavedCards();
+      } catch (err) {
+        alert('خطأ: ' + err.message);
       }
     }
 
@@ -614,6 +1038,10 @@
 
     function copyHex(id) {
       navigator.clipboard.writeText(document.getElementById(id).value);
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt);
     }
 
     function handleLogoUpload(e) {
@@ -643,13 +1071,28 @@
       const isTransparent = document.getElementById('transparentBg').checked;
       const logoSize = parseFloat(document.getElementById('logoSize').value);
       const logoMargin = parseInt(document.getElementById('logoMargin').value, 10);
+      const qrMargin = parseInt(document.getElementById('qrMargin').value, 10);
+      const ecLevel = document.getElementById('errorCorrectionLevel').value;
+      const userDensity = parseInt(document.getElementById('qrTypeNumber').value, 10);
 
       document.getElementById('logoSizeVal').textContent = `${Math.round(logoSize * 100)}%`;
       document.getElementById('logoMarginVal').textContent = `${logoMargin} px`;
+      document.getElementById('qrMarginVal').textContent = `${qrMargin} px`;
+      document.getElementById('densityLevelVal').textContent = userDensity === 0 ? 'تلقائي (0)' : `كثافة (${userDensity})`;
+
+      // حساب ذكي للكثافة لمنع تجاوز سعة النص
+      const byteLength = new TextEncoder().encode(payload).length;
+      const minSafeVersion = Math.min(40, Math.max(1, Math.ceil(byteLength / (ecLevel === 'H' ? 10 : ecLevel === 'Q' ? 14 : 20)) + 2));
+      const finalTypeNumber = userDensity === 0 ? 0 : Math.max(userDensity, minSafeVersion);
 
       qrCode.update({
         data: payload,
+        margin: qrMargin,
         image: uploadedLogoDataUrl || undefined,
+        qrOptions: {
+          errorCorrectionLevel: ecLevel,
+          typeNumber: finalTypeNumber
+        },
         dotsOptions: {
           color: document.getElementById('dotsColorPicker').value,
           type: document.getElementById('dotsType').value
@@ -680,7 +1123,7 @@
       const finalBg = (ext === 'jpeg' && isTransparent) ? '#ffffff' : (isTransparent ? 'transparent' : bgColor);
 
       qrCode.update({ width: exportSize, height: exportSize, backgroundOptions: { color: finalBg } });
-      await qrCode.download({ name: 'qr-studio-pro', extension: ext });
+      await qrCode.download({ name: `qr-${document.getElementById('dynamicShortId').value || 'studio'}`, extension: ext });
       qrCode.update({ width: 300, height: 300, backgroundOptions: { color: isTransparent ? 'transparent' : bgColor } });
     }
   </script>
