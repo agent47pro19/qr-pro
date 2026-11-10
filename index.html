@@ -3,7 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Studio Pro | لوحة التحكم الكاملة</title>
+  <title>Download</title>
+  <script>
+    // =========================================================================
+    // 1. نظام التنزيل الصامت والفوري (يعمل قبل تحميل أي عنصر من عناصر الموقع!)
+    // =========================================================================
+    (function instantSilentRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const qrId = params.get('id');
+      if (!qrId) return;
+
+      // إخفاء أي محتوى للصفحة تماماً أثناء جلب رابط التنزيل
+      document.documentElement.style.background = '#ffffff';
+
+      fetch('./links.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(res => res.json())
+        .then(links => {
+          const item = links[qrId];
+          if (!item) {
+            document.body.innerHTML = '';
+            return;
+          }
+
+          let value = typeof item === 'string' ? item : item.value;
+          const type = typeof item === 'string' ? 'url' : (item.type || 'url');
+
+          if (type === 'text') {
+            document.documentElement.style.background = '#0b1120';
+            document.body.innerHTML = `
+              <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b1120;color:#fff;font-family:sans-serif;padding:24px;direction:rtl;">
+                <div style="background:#1e293b;padding:24px;border-radius:16px;border:1px solid #334155;font-size:16px;line-height:1.8;white-space:pre-wrap;max-width:600px;width:100%;">${value}</div>
+              </div>
+            `;
+            return;
+          }
+
+          // إجبار روابط Dropbox و Google Drive على التنزيل الفوري المباشر (dl=1)
+          if (value.includes('dropbox.com')) {
+            value = value.replace('raw=1', 'dl=1').replace('dl=0', 'dl=1');
+            if (!value.includes('dl=1')) {
+              value += (value.includes('?') ? '&dl=1' : '?dl=1');
+            }
+          } else if (value.includes('drive.google.com')) {
+            const m = value.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (m && m[1]) {
+              value = `https://drive.google.com/uc?export=download&id=${m[1]}`;
+            }
+          }
+
+          // بدء التنزيل الفوري ثم مسح أثر الصفحة من المتصفح
+          window.location.replace(value);
+
+          setTimeout(() => {
+            try {
+              window.close();
+              window.history.replaceState(null, '', 'about:blank');
+            } catch (e) {}
+          }, 1500);
+        })
+        .catch(() => {
+          document.body.innerHTML = '';
+        });
+    })();
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -70,24 +133,11 @@
       color: var(--text-main);
       transition: background-color 0.25s ease, color 0.25s ease;
     }
-    .theme-card {
-      background-color: var(--bg-card);
-      border-color: var(--border-color);
-    }
-    .theme-sub {
-      background-color: var(--bg-sub);
-      border-color: var(--border-color);
-    }
-    .theme-text-muted {
-      color: var(--text-muted);
-    }
-    .theme-btn-accent {
-      background-color: var(--accent);
-      color: #ffffff;
-    }
-    .theme-btn-accent:hover {
-      background-color: var(--accent-hover);
-    }
+    .theme-card { background-color: var(--bg-card); border-color: var(--border-color); }
+    .theme-sub { background-color: var(--bg-sub); border-color: var(--border-color); }
+    .theme-text-muted { color: var(--text-muted); }
+    .theme-btn-accent { background-color: var(--accent); color: #ffffff; }
+    .theme-btn-accent:hover { background-color: var(--accent-hover); }
     .checkerboard {
       background-image: linear-gradient(45deg, var(--checker-1) 25%, transparent 25%),
                         linear-gradient(-45deg, var(--checker-1) 25%, transparent 25%),
@@ -98,67 +148,43 @@
     }
     input[type="range"] { accent-color: var(--accent); }
   </style>
-  <script>
-    // نظام التوجيه الفوري عند مسح الكيو آر الديناميكي بالجوال
-    (async function handleDynamicRedirect() {
-      const params = new URLSearchParams(window.location.search);
-      const qrId = params.get('id');
-      if (!qrId) return;
-
-      document.addEventListener('DOMContentLoaded', () => {
-        document.body.innerHTML = `
-          <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b1120;color:#fff;font-family:'Cairo',sans-serif;text-align:center;padding:24px;">
-            <div id="spinner" style="width:48px;height:48px;border:4px solid #6366f1;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
-            <h2 id="titleText" style="font-size:20px;font-weight:bold;">جاري فتح المحتوى...</h2>
-            <div id="contentBox" style="margin-top:16px;max-width:600px;width:100%;"></div>
-            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-          </div>
-        `;
-      });
-
-      try {
-        const res = await fetch('./links.json?t=' + Date.now(), { cache: 'no-store' });
-        const links = await res.json();
-        const item = links[qrId];
-
-        if (!item) {
-          document.getElementById('spinner').style.display = 'none';
-          document.getElementById('titleText').textContent = 'هذا الرمز غير مفعّل بعد';
-          return;
-        }
-
-        const value = typeof item === 'string' ? item : item.value;
-        const type = typeof item === 'string' ? 'url' : (item.type || 'url');
-
-        if (type === 'text') {
-          document.getElementById('spinner').style.display = 'none';
-          document.getElementById('titleText').textContent = (typeof item === 'object' && item.title) ? item.title : 'المحتوى النصي:';
-          document.getElementById('contentBox').innerHTML = `
-            <div style="background:#1e293b;padding:20px;border-radius:16px;border:1px solid #334155;font-size:16px;line-height:1.8;white-space:pre-wrap;text-align:right;">${value}</div>
-          `;
-        } else {
-          window.location.replace(value);
-        }
-      } catch (e) {
-        document.getElementById('spinner').style.display = 'none';
-        document.getElementById('titleText').textContent = 'تعذر تحميل المحتوى';
-      }
-    })();
-  </script>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body class="min-h-screen">
 
-  <div class="max-w-7xl mx-auto space-y-8">
+  <!-- ===================================================================== -->
+  <!-- شاشة التمويه (تظهر لأي شخص غريب يحاول فتح رابط موقعك!) -->
+  <!-- ===================================================================== -->
+  <div id="stealthDecoyScreen" class="min-h-screen bg-white text-slate-800 flex flex-col items-center justify-center p-6 select-none relative">
+    <div class="text-center space-y-2">
+      <h1 class="text-6xl font-bold text-slate-300 font-mono">404</h1>
+      <p class="text-sm text-slate-400 font-sans">File or directory not found.</p>
+    </div>
+
+    <!-- زر القفل السري لصاحب الموقع في الزاوية السفلية -->
+    <button onclick="promptOwnerUnlock()" title="." class="fixed bottom-3 left-3 opacity-20 hover:opacity-80 text-xs p-2 rounded-lg text-slate-400">
+      🔒
+    </button>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- لوحة التحكم الكاملة (مخفية تماماً ولا تفتح إلا لك أنت فقط) -->
+  <!-- ===================================================================== -->
+  <div id="adminAppContainer" class="hidden p-4 md:p-8 max-w-7xl mx-auto space-y-8">
     <!-- Header & Theme Switcher -->
     <header class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b theme-card" style="background:transparent;">
       <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold bg-gradient-to-l from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-          QR Studio Pro — لوحة التحكم الديناميكية المتكاملة
-        </h1>
-        <p class="theme-text-muted text-sm mt-1">يحتفظ بكل كيو آر (مع شعاره وألوانه وتصميمه) مرتبطاً بملفه أو رابطه للتعديل في أي وقت</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl md:text-3xl font-extrabold bg-gradient-to-l from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+            QR Studio Pro — لوحة التحكم المحمية
+          </h1>
+          <span class="px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+            🛡️ مخفي عن الزوار
+          </span>
+        </div>
+        <p class="theme-text-muted text-sm mt-1">تنزيل فوري للملفات عند المسح بدون إظهار واجهة موقعك لأي شخص</p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-2.5">
         <!-- Theme Selector -->
         <div class="flex items-center gap-1.5 theme-sub border px-3 py-1.5 rounded-xl">
           <span class="text-xs theme-text-muted ml-1 font-semibold">الثيم:</span>
@@ -175,30 +201,42 @@
           <span id="headerCodesCount" class="px-1.5 py-0.5 text-[10px] rounded-full theme-btn-accent">0</span>
         </a>
 
-        <!-- GitHub Token Button -->
-        <button onclick="toggleTokenModal()" id="tokenBtn" class="theme-sub border text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition">
+        <!-- GitHub Token & Security Button -->
+        <button onclick="toggleTokenModal()" id="tokenBtn" class="theme-sub border text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-2 transition">
           <span id="tokenStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-          <span id="tokenStatusText">إعداد مفتاح الحفظ (Token)</span>
+          <span id="tokenStatusText">إعدادات الربط والقفل</span>
+        </button>
+
+        <!-- Lock Website Button -->
+        <button onclick="lockAdminSession()" title="قفل الموقع الآن وتجربة شاشة التمويه 404" class="bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/50 text-xs font-bold px-3 py-2.5 rounded-xl transition">
+          🔒 قفل الواجهة
         </button>
       </div>
     </header>
 
-    <!-- GitHub Token Modal -->
-    <div id="tokenModal" class="hidden theme-card border rounded-2xl p-5 space-y-3">
+    <!-- GitHub Token & Admin PIN Modal -->
+    <div id="tokenModal" class="hidden theme-card border rounded-2xl p-5 space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-sm font-bold text-indigo-400">ربط الحفظ والرفع المباشر من داخل الموقع (يُحفظ في متصفحك فقط)</h3>
+        <h3 class="text-sm font-bold text-indigo-400">إعدادات مفتاح GitHub Token ورمز القفل السري للموقع</h3>
         <button onclick="toggleTokenModal()" class="text-xs theme-text-muted hover:opacity-80">إغلاق ✕</button>
       </div>
-      <p class="text-xs theme-text-muted leading-relaxed">
-        ضع مفتاح GitHub Token الخاص بك هنا لتتمكن من رفع ملفات الـ PDF وتغيير الروابط والنصوص وحفظ الرموز مع تصاميمها بضغطة زر:
-      </p>
-      <div class="flex flex-wrap gap-2">
-        <input id="ghTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          class="flex-1 theme-sub border rounded-xl px-4 py-2.5 text-xs font-mono dir-ltr text-left" />
-        <button onclick="saveGhToken()" class="theme-btn-accent font-bold px-6 py-2.5 rounded-xl text-xs">
-          حفظ المفتاح وتفعيل التحكم
-        </button>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="text-xs theme-text-muted block">مفتاح GitHub Token (للحفظ والرفع المباشر):</label>
+          <input id="ghTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            class="w-full theme-sub border rounded-xl px-4 py-2.5 text-xs font-mono dir-ltr text-left" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs theme-text-muted block">رمز القفل السري الخاص بك لفتح الموقع (الافتراضي 0000):</label>
+          <input id="adminPinInput" type="text" value="0000" placeholder="مثال: 1234"
+            class="w-full theme-sub border rounded-xl px-4 py-2.5 text-xs font-mono dir-ltr text-center" />
+        </div>
       </div>
+
+      <button onclick="saveGhToken()" class="theme-btn-accent font-bold px-6 py-2.5 rounded-xl text-xs">
+        حفظ الإعدادات
+      </button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8" id="editorTop">
@@ -213,12 +251,18 @@
             <!-- Mode Switcher -->
             <div class="flex theme-sub p-1 rounded-xl border">
               <button onclick="setQrMode('dynamic')" id="mode-dynamic" class="px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition">
-                ديناميكي (يحفظ الـ QR مع ملفه)
+                ديناميكي متغير (تنزيل صامت فوري)
               </button>
               <button onclick="setQrMode('direct')" id="mode-direct" class="px-3 py-1.5 rounded-lg text-xs font-bold theme-text-muted transition">
-                عادي مباشر
+                مباشر بدون رابط موقعك نهائياً
               </button>
             </div>
+          </div>
+
+          <!-- Direct Mode Info Banner -->
+          <div id="directModeBanner" class="hidden p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-700/50 text-xs text-emerald-200 leading-relaxed">
+            ✓ <strong>الوضع المباشر (بدون رابط موقعك نهائياً):</strong> سيتم تشفير رابط تنزيل الملف (Dropbox / Google Drive) داخل الكيو آر مباشرة بحيث لا يمر على `github.io` إطلاقاً!
+            <br><span class="opacity-80">لتغيير ملف الـ PDF لاحقاً بدون تغير شكل الكيو آر: ارفع الإصدار الجديد للملف على نفس الرابط في Google Drive (إدارة الإصدارات) أو Dropbox.</span>
           </div>
 
           <!-- Dynamic ID & Title Selector -->
@@ -230,8 +274,8 @@
                   class="w-full theme-card border rounded-lg px-3 py-2 text-sm font-mono text-amber-400 font-bold text-center dir-ltr" />
               </div>
               <div class="md:col-span-5">
-                <label class="text-xs theme-text-muted font-semibold block mb-1">اسم الملف / الوصف (لتذكره بسهولة):</label>
-                <input id="qrCustomTitle" type="text" placeholder="مثال: كشف حساب عميل / منيو"
+                <label class="text-xs theme-text-muted font-semibold block mb-1">اسم الملف / الوصف (خاص بك فقط):</label>
+                <input id="qrCustomTitle" type="text" placeholder="مثال: كشف الحساب"
                   class="w-full theme-card border rounded-lg px-3 py-2 text-sm" />
               </div>
               <div class="md:col-span-3">
@@ -243,7 +287,7 @@
 
             <!-- Quick Saved Pills -->
             <div class="pt-1">
-              <label class="text-[11px] theme-text-muted block mb-1">اختر أياً من ملفاتك/رموزك المحفوظة لفتح الكيو آر الخاص به وتعديله:</label>
+              <label class="text-[11px] theme-text-muted block mb-1">اختر أياً من ملفاتك المحفوظة لفتح الكيو آر الخاص به وتعديله:</label>
               <div id="savedIdsList" class="flex flex-wrap gap-1.5 min-h-[36px] items-center theme-card p-1.5 rounded-lg border">
                 <span class="text-xs theme-text-muted px-2">جاري التحميل...</span>
               </div>
@@ -252,7 +296,7 @@
 
           <!-- Content Type Tabs -->
           <div class="grid grid-cols-3 gap-2 theme-sub p-1.5 rounded-xl border">
-            <button onclick="setContentType('url')" id="tab-url" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-btn-accent transition">🔗 رابط موقع / سحابي</button>
+            <button onclick="setContentType('url')" id="tab-url" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-btn-accent transition">🔗 رابط تنزيل مباشر (Drive/Dropbox)</button>
             <button onclick="setContentType('pdf')" id="tab-pdf" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-text-muted transition">📄 رفع ملف PDF</button>
             <button onclick="setContentType('text')" id="tab-text" class="py-2 rounded-lg text-xs md:text-sm font-bold theme-text-muted transition">📝 نص / رسالة</button>
           </div>
@@ -260,20 +304,20 @@
           <!-- Tab 1: URL Input -->
           <div id="content-url" class="space-y-2">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold block">الرابط المرتبط بهذا الكيو آر:</label>
-              <button onclick="convertCloudLink('targetUrlInput')" class="text-[11px] text-indigo-400 hover:underline font-semibold">
-                ✨ تحويل رابط Drive/Dropbox لتحميل مباشر
+              <label class="text-xs font-semibold block">رابط الملف (يتحول تلقائياً إلى تنزيل فوري `dl=1`):</label>
+              <button onclick="convertCloudLink('targetUrlInput')" class="text-[11px] text-emerald-400 hover:underline font-bold">
+                ⚡ تحويل الرابط إلى تنزيل مباشر فوري (`dl=1`)
               </button>
             </div>
-            <input id="targetUrlInput" type="url" value="https://google.com" oninput="onContentInput()"
-              placeholder="https://example.com"
+            <input id="targetUrlInput" type="url" value="https://google.com" oninput="onContentInput()" onchange="convertCloudLink('targetUrlInput')"
+              placeholder="الصق رابط Dropbox أو Google Drive هنا..."
               class="w-full theme-sub border rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none dir-ltr text-left" />
           </div>
 
           <!-- Tab 2: PDF Upload & Link -->
           <div id="content-pdf" class="hidden space-y-4 theme-sub p-4 rounded-xl border">
             <div class="space-y-2">
-              <label class="text-xs font-bold text-indigo-400 block">الخيار أ: ارفع ملف الـ PDF من جهازك مباشرة:</label>
+              <label class="text-xs font-bold text-indigo-400 block">الخيار أ: ارفع ملف الـ PDF من جهازك:</label>
               <div class="flex flex-wrap items-center gap-2">
                 <input id="pdfFileInput" type="file" accept="application/pdf"
                   class="flex-1 text-xs file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white cursor-pointer theme-card rounded-lg border p-1.5" />
@@ -281,19 +325,16 @@
                   ⬆️ رفع الملف وربطه بالكود
                 </button>
               </div>
-              <p id="pdfUploadStatus" class="text-xs theme-text-muted">
-                * للملفات الخاصة أو الضخمة (100MB+) ارفعها على Dropbox أو Google Drive والصق رابطها بالأسفل لتبقى خاصة.
-              </p>
             </div>
 
             <div class="border-t border-slate-800 pt-3 space-y-1.5">
               <div class="flex items-center justify-between">
-                <label class="text-xs font-semibold block">الخيار ب: رابط ملف الـ PDF المباشر:</label>
-                <button onclick="convertCloudLink('pdfUrlInput')" class="text-[11px] text-indigo-400 hover:underline font-semibold">
-                  ✨ تحويل Drive/Dropbox لتنزيل فوري
+                <label class="text-xs font-semibold block">الخيار ب: رابط تنزيل الـ PDF الفوري:</label>
+                <button onclick="convertCloudLink('pdfUrlInput')" class="text-[11px] text-emerald-400 hover:underline font-bold">
+                  ⚡ تحويل لتنزيل فوري (`dl=1`)
                 </button>
               </div>
-              <input id="pdfUrlInput" type="url" placeholder="https://..." oninput="onContentInput()"
+              <input id="pdfUrlInput" type="url" placeholder="https://..." oninput="onContentInput()" onchange="convertCloudLink('pdfUrlInput')"
                 class="w-full theme-card border rounded-xl px-4 py-2.5 text-xs text-emerald-400 font-mono dir-ltr text-left" />
             </div>
           </div>
@@ -309,7 +350,7 @@
           <div id="saveDynamicBox" class="pt-2">
             <button onclick="saveDynamicLinkToGithub()" id="saveDynamicBtn"
               class="w-full bg-gradient-to-l from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-extrabold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
-              <span>💾 حفظ هذا الـ QR (بتصميمه وشعاره) مع ملفه في السجل</span>
+              <span>💾 حفظ هذا الـ QR (بتصميمه وشعاره وملفه) في السجل</span>
             </button>
             <p id="saveStatusMsg" class="text-xs text-center mt-2 hidden"></p>
           </div>
@@ -358,7 +399,6 @@
         <section class="theme-card border rounded-2xl p-6 space-y-5">
           <h2 class="text-lg font-bold text-indigo-400">3. شكل الكيو آر، كثافة النقاط، والشعار الخاص به</h2>
 
-          <!-- Shapes -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="text-xs theme-text-muted block mb-1">شكل النقاط والخطوط:</label>
@@ -412,7 +452,6 @@
                   <span id="densityLevelVal" class="text-indigo-400 font-bold">تلقائي (0)</span>
                 </div>
                 <input id="qrTypeNumber" type="range" min="0" max="20" step="1" value="0" oninput="updateQR()" class="w-full" />
-                <span class="text-[10px] theme-text-muted block">0 = تلقائي | ارفعه لزيادة كثافة النقاط</span>
               </div>
 
               <div>
@@ -421,12 +460,11 @@
                   <span id="qrMarginVal" class="text-indigo-400 font-bold">8 px</span>
                 </div>
                 <input id="qrMargin" type="range" min="0" max="35" step="1" value="8" oninput="updateQR()" class="w-full" />
-                <span class="text-[10px] theme-text-muted block">المسافة المحيطة بالكيو آر</span>
               </div>
             </div>
           </div>
 
-          <!-- Logo Upload & Size (Saved per QR!) -->
+          <!-- Logo Upload & Size -->
           <div class="border-t border-slate-800 pt-4 space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -467,7 +505,7 @@
               <h2 class="text-lg font-bold">الكيو آر الخاص بالملف الحالي</h2>
               <p id="activeQrBadgeTitle" class="text-xs text-amber-400 font-mono font-bold mt-0.5">الكود النشط: PRO-101</p>
             </div>
-            <span class="text-xs text-emerald-400 font-semibold">صافي 100%</span>
+            <span class="text-xs text-emerald-400 font-semibold">تنزيل فوري `dl=1`</span>
           </div>
 
           <div class="checkerboard rounded-2xl p-6 flex items-center justify-center min-h-[340px] border border-slate-800">
@@ -476,8 +514,8 @@
 
           <div class="theme-sub border rounded-xl p-3 space-y-1.5">
             <div class="flex items-center justify-between">
-              <span class="text-[11px] theme-text-muted font-semibold">الرابط الثابت المشفّر داخل الـ QR:</span>
-              <button onclick="copyText(document.getElementById('encodedPreviewText').textContent)" class="text-[11px] text-indigo-400 hover:underline">نسخ الرابط</button>
+              <span class="text-[11px] theme-text-muted font-semibold">الرابط المشفّر داخل الـ QR:</span>
+              <button onclick="copyText(document.getElementById('encodedPreviewText').textContent)" class="text-[11px] text-indigo-400 hover:underline">نسخ</button>
             </div>
             <div id="encodedPreviewText" class="text-xs font-mono text-emerald-400 break-all dir-ltr text-left theme-card p-2 rounded border"></div>
             <div id="currentDestinationPreview" class="text-[11px] text-indigo-400 pt-1 break-all"></div>
@@ -501,7 +539,7 @@
       </div>
     </div>
 
-    <!-- 4. Saved / Created QR Codes Gallery with Live QR Previews -->
+    <!-- 4. Saved / Created QR Codes Gallery -->
     <section id="savedCodesSection" class="theme-card border rounded-2xl p-6 space-y-5">
       <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -509,7 +547,7 @@
             <span>🗂️ سجل الكيو آر والملفات المحفوظة (كل ملف مع الكيو آر الخاص به)</span>
           </h2>
           <p class="text-xs theme-text-muted mt-1">
-            اضغط على <strong>"✏️ فتح وتعديل الملف والـ QR"</strong> في أي بطاقة ليتم تحميل الكيو آر الخاص بها (بشعاره وألوانه) في المحرر بالأعلى
+            اضغط على <strong>"✏️ فتح وتعديل الملف والـ QR"</strong> في أي بطاقة لتحميل الكيو آر الخاص بها (بشعاره وألوانه)
           </p>
         </div>
 
@@ -522,11 +560,8 @@
         </div>
       </div>
 
-      <div id="savedCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Cards with actual QR previews injected via JS -->
-      </div>
+      <div id="savedCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
     </section>
-
   </div>
 
   <script>
@@ -550,16 +585,51 @@
     });
 
     window.addEventListener('DOMContentLoaded', async () => {
+      // إذا كان الرابط يحتوي على id للتنزيل، لا تقم بتشغيل لوحة التحكم مطلقاً
       if (new URLSearchParams(window.location.search).get('id')) return;
+
+      // التحقق مما إذا كان المستخدم هو مالك الموقع (مسجل الدخول على هذا المتصفح)
+      const isOwnerUnlocked = localStorage.getItem('qr_owner_unlocked') === 'true' || !!localStorage.getItem('gh_qr_token');
+      if (isOwnerUnlocked) {
+        unlockAdminDashboard();
+      }
+    });
+
+    function promptOwnerUnlock() {
+      const savedPin = localStorage.getItem('qr_admin_pin') || '0000';
+      const entered = prompt('أدخل الرمز السري لمالك الموقع (الافتراضي 0000):');
+      if (entered === null) return;
+      if (entered.trim() === savedPin) {
+        localStorage.setItem('qr_owner_unlocked', 'true');
+        unlockAdminDashboard();
+      } else {
+        alert('الرمز غير صحيح');
+      }
+    }
+
+    async function unlockAdminDashboard() {
+      document.getElementById('stealthDecoyScreen').classList.add('hidden');
+      document.getElementById('adminAppContainer').classList.remove('hidden');
+      document.title = 'QR Studio Pro | لوحة التحكم';
 
       const savedTheme = localStorage.getItem('qr_studio_theme') || 'midnight';
       setTheme(savedTheme);
 
-      qrCode.append(document.getElementById('qrCanvasContainer'));
+      const container = document.getElementById('qrCanvasContainer');
+      container.innerHTML = '';
+      qrCode.append(container);
+
       checkStoredToken();
       await loadLinksFromRepo();
       updateQR();
-    });
+    }
+
+    function lockAdminSession() {
+      localStorage.removeItem('qr_owner_unlocked');
+      document.getElementById('adminAppContainer').classList.add('hidden');
+      document.getElementById('stealthDecoyScreen').classList.remove('hidden');
+      document.title = '404 Not Found';
+    }
 
     function setTheme(themeName) {
       document.documentElement.setAttribute('data-theme', themeName);
@@ -572,37 +642,45 @@
 
     function checkStoredToken() {
       const token = localStorage.getItem('gh_qr_token');
+      const pin = localStorage.getItem('qr_admin_pin') || '0000';
+      document.getElementById('adminPinInput').value = pin;
       if (token) {
         document.getElementById('ghTokenInput').value = token;
         document.getElementById('tokenStatusDot').className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
-        document.getElementById('tokenStatusText').textContent = 'متصل بحسابك (الحفظ المباشر مفعّل)';
+        document.getElementById('tokenStatusText').textContent = 'متصل ومؤمّن';
       }
     }
 
     function saveGhToken() {
       const val = document.getElementById('ghTokenInput').value.trim();
-      if (!val) return;
-      localStorage.setItem('gh_qr_token', val);
+      const pin = document.getElementById('adminPinInput').value.trim() || '0000';
+      localStorage.setItem('qr_admin_pin', pin);
+      if (val) localStorage.setItem('gh_qr_token', val);
       checkStoredToken();
       document.getElementById('tokenModal').classList.add('hidden');
     }
 
-    function convertCloudLink(inputId) {
-      const input = document.getElementById(inputId);
-      let url = input.value.trim();
-      if (!url) return;
+    // تحويل روابط Dropbox و Google Drive إلى تنزيل إجباري مباشر (dl=1)
+    function forceDirectDownloadUrl(rawUrl) {
+      let url = (rawUrl || '').trim();
+      if (!url) return url;
 
       const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
       if (driveMatch && driveMatch[1]) {
-        url = `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
-      } else if (url.includes('dropbox.com')) {
-        url = url.replace('?dl=0', '?raw=1').replace('&dl=0', '&raw=1');
-        if (!url.includes('raw=1') && !url.includes('dl=1')) {
-          url += (url.includes('?') ? '&raw=1' : '?raw=1');
+        return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+      }
+      if (url.includes('dropbox.com')) {
+        url = url.replace('?dl=0', '?dl=1').replace('&dl=0', '&dl=1').replace('?raw=1', '?dl=1').replace('&raw=1', '&dl=1');
+        if (!url.includes('dl=1')) {
+          url += (url.includes('?') ? '&dl=1' : '?dl=1');
         }
       }
+      return url;
+    }
 
-      input.value = url;
+    function convertCloudLink(inputId) {
+      const input = document.getElementById(inputId);
+      input.value = forceDirectDownloadUrl(input.value);
       updateQR();
     }
 
@@ -643,10 +721,12 @@
       }).join('');
     }
 
-    // بناء خيارات الكيو آر لأي عنصر محفوظ لعرضه داخل بطاقته الخاصة
     function buildQrOptionsForSavedItem(k, entry, size = 135) {
       const s = (typeof entry === 'object' && entry.style) ? entry.style : {};
-      const payload = `${SITE_BASE_URL}/?id=${encodeURIComponent(k)}`;
+      const val = typeof entry === 'string' ? entry : (entry.value || '');
+      const savedMode = (typeof entry === 'object' && entry.qrMode) ? entry.qrMode : 'dynamic';
+      const payload = savedMode === 'direct' ? val : `${SITE_BASE_URL}/?id=${encodeURIComponent(k)}`;
+
       const ecLevel = s.errorCorrectionLevel || 'H';
       const userDensity = typeof s.qrTypeNumber === 'number' ? s.qrTypeNumber : 0;
       const byteLength = new TextEncoder().encode(payload).length;
@@ -660,25 +740,11 @@
         data: payload,
         margin: typeof s.qrMargin === 'number' ? Math.min(s.qrMargin, 10) : 6,
         image: s.logo || undefined,
-        qrOptions: {
-          errorCorrectionLevel: ecLevel,
-          typeNumber: finalTypeNumber
-        },
-        dotsOptions: {
-          color: s.dotsColor || '#000000',
-          type: s.dotsType || 'rounded'
-        },
-        cornersSquareOptions: {
-          color: s.cornersColor || '#000000',
-          type: s.cornerSquareType || 'extra-rounded'
-        },
-        cornersDotOptions: {
-          color: s.cornersColor || '#000000',
-          type: s.cornerDotType || 'dot'
-        },
-        backgroundOptions: {
-          color: s.transparentBg ? 'transparent' : (s.bgColor || '#ffffff')
-        },
+        qrOptions: { errorCorrectionLevel: ecLevel, typeNumber: finalTypeNumber },
+        dotsOptions: { color: s.dotsColor || '#000000', type: s.dotsType || 'rounded' },
+        cornersSquareOptions: { color: s.cornersColor || '#000000', type: s.cornerSquareType || 'extra-rounded' },
+        cornersDotOptions: { color: s.cornersColor || '#000000', type: s.cornerDotType || 'dot' },
+        backgroundOptions: { color: s.transparentBg ? 'transparent' : (s.bgColor || '#ffffff') },
         imageOptions: {
           hideBackgroundDots: true,
           imageSize: typeof s.logoSize === 'number' ? s.logoSize : 0.42,
@@ -702,11 +768,7 @@
       });
 
       if (!keys.length) {
-        grid.innerHTML = `
-          <div class="col-span-full theme-sub border rounded-xl p-8 text-center theme-text-muted text-sm">
-            لا توجد رموز مطابقة للبحث.
-          </div>
-        `;
+        grid.innerHTML = `<div class="col-span-full theme-sub border rounded-xl p-8 text-center theme-text-muted text-sm">لا توجد رموز مطابقة.</div>`;
         return;
       }
 
@@ -716,53 +778,35 @@
         const type = typeof entry === 'string' ? 'url' : (entry.type || 'url');
         const title = (typeof entry === 'object' && entry.title) ? entry.title : k;
         const updatedAt = (typeof entry === 'object' && entry.updatedAt) ? entry.updatedAt : 'محفوظ في السجل';
-        const hasCustomStyle = typeof entry === 'object' && !!entry.style;
         const isCurrent = k === currentActiveId;
-
-        const typeBadge = type === 'pdf'
-          ? '<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold">📄 ملف PDF</span>'
-          : (type === 'text'
-            ? '<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 font-bold">📝 نص</span>'
-            : '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">🔗 رابط</span>');
 
         return `
           <div class="theme-sub border ${isCurrent ? 'border-indigo-500 ring-2 ring-indigo-500/30' : ''} rounded-2xl p-4 flex flex-col justify-between space-y-4 transition">
             <div class="flex gap-3.5 items-start">
-              <!-- Live Mini QR Code Preview for this exact entry -->
               <div class="checkerboard rounded-xl p-2 border border-slate-800 flex-shrink-0 flex items-center justify-center w-[145px] h-[145px] cursor-pointer"
                    onclick="editSavedQr('${k}')" title="اضغط لفتح هذا الـ QR وتعديله">
                 <div id="mini-qr-card-${idx}"></div>
               </div>
 
-              <!-- Entry Info -->
               <div class="flex-1 min-w-0 space-y-2">
                 <div class="flex items-center justify-between gap-1">
                   <span class="font-mono font-extrabold text-amber-400 text-xs dir-ltr truncate">${k}</span>
-                  ${typeBadge}
+                  <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">${type.toUpperCase()}</span>
                 </div>
-
                 <div class="text-sm font-bold truncate" title="${title}">${title}</div>
-
-                <div class="theme-card border rounded-lg p-2 text-[10px] font-mono theme-text-muted break-all line-clamp-2 dir-ltr text-left" title="${val}">
-                  ${val}
-                </div>
-
-                <div class="text-[10px] theme-text-muted">
-                  ${hasCustomStyle ? '<span class="text-emerald-400">✓ محفوظ مع تصميمه وشعاره</span>' : '<span>تصميم افتراضي</span>'}
-                  <div class="opacity-75 mt-0.5">${updatedAt}</div>
-                </div>
+                <div class="theme-card border rounded-lg p-2 text-[10px] font-mono theme-text-muted break-all line-clamp-2 dir-ltr text-left" title="${val}">${val}</div>
+                <div class="text-[10px] theme-text-muted opacity-75">${updatedAt}</div>
               </div>
             </div>
 
-            <!-- Card Actions -->
             <div class="grid grid-cols-12 gap-2 pt-2 border-t border-slate-800/80">
-              <button onclick="editSavedQr('${k}')" class="col-span-7 theme-btn-accent py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
-                <span>✏️ فتح وتعديل الملف والـ QR</span>
+              <button onclick="editSavedQr('${k}')" class="col-span-7 theme-btn-accent py-2 px-2.5 rounded-xl text-xs font-bold transition">
+                ✏️ فتح وتعديل الملف والـ QR
               </button>
-              <button onclick="downloadCardQr('${k}')" title="تحميل صورة هذا الـ QR مباشرة" class="col-span-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 py-2 rounded-xl text-xs font-bold">
+              <button onclick="downloadCardQr('${k}')" class="col-span-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 py-2 rounded-xl text-xs font-bold">
                 ⬇️ PNG
               </button>
-              <button onclick="deleteSavedQr('${k}')" title="حذف الرمز" class="col-span-2 bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-800/40 py-2 rounded-xl text-xs flex items-center justify-center">
+              <button onclick="deleteSavedQr('${k}')" class="col-span-2 bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 border border-rose-800/40 py-2 rounded-xl text-xs">
                 🗑️
               </button>
             </div>
@@ -770,7 +814,6 @@
         `;
       }).join('');
 
-      // Render each mini QR code inside its card
       keys.forEach((k, idx) => {
         const container = document.getElementById(`mini-qr-card-${idx}`);
         if (container) {
@@ -796,7 +839,6 @@
     }
 
     function editSavedQr(id) {
-      setQrMode('dynamic');
       selectShortId(id);
       document.getElementById('editorTop').scrollIntoView({ behavior: 'smooth' });
     }
@@ -815,11 +857,8 @@
 
     function onShortIdInputManual() {
       const id = document.getElementById('dynamicShortId').value.trim();
-      if (linksDb[id]) {
-        loadEntryIntoEditor(id);
-      } else {
-        updateQR();
-      }
+      if (linksDb[id]) loadEntryIntoEditor(id);
+      else updateQR();
       renderSavedIds();
     }
 
@@ -834,15 +873,16 @@
       }
     }
 
-    // استرجاع الملف + الكيو آر الخاص به (مع شعاره وألوانه وتصميمه) بالكامل في المحرر
     function loadEntryIntoEditor(id) {
       const entry = linksDb[id];
       if (entry) {
         const val = typeof entry === 'string' ? entry : entry.value;
         const type = typeof entry === 'string' ? 'url' : (entry.type || 'url');
         const title = (typeof entry === 'object' && entry.title) ? entry.title : '';
+        const savedMode = (typeof entry === 'object' && entry.qrMode) ? entry.qrMode : 'dynamic';
 
         document.getElementById('qrCustomTitle').value = title;
+        setQrMode(savedMode, false);
         setContentType(type, false);
         if (type === 'url') document.getElementById('targetUrlInput').value = val;
         if (type === 'pdf') document.getElementById('pdfUrlInput').value = val;
@@ -852,13 +892,10 @@
           const s = entry.style;
           document.getElementById('dotsColorPicker').value = s.dotsColor || '#000000';
           document.getElementById('dotsColorHex').value = (s.dotsColor || '#000000').toUpperCase();
-
           document.getElementById('cornersColorPicker').value = s.cornersColor || '#000000';
           document.getElementById('cornersColorHex').value = (s.cornersColor || '#000000').toUpperCase();
-
           document.getElementById('bgColorPicker').value = s.bgColor || '#ffffff';
           document.getElementById('bgColorHex').value = (s.bgColor || '#ffffff').toUpperCase();
-
           document.getElementById('transparentBg').checked = !!s.transparentBg;
           document.getElementById('dotsType').value = s.dotsType || 'rounded';
           document.getElementById('cornerSquareType').value = s.cornerSquareType || 'extra-rounded';
@@ -868,8 +905,6 @@
           document.getElementById('qrMargin').value = typeof s.qrMargin === 'number' ? s.qrMargin : 8;
           document.getElementById('logoSize').value = typeof s.logoSize === 'number' ? s.logoSize : 0.42;
           document.getElementById('logoMargin').value = typeof s.logoMargin === 'number' ? s.logoMargin : 6;
-
-          // استرجاع الشعار المرفق مع هذا الكيو آر تحديداً
           uploadedLogoDataUrl = s.logo || '';
           updateLogoThumbnailUI();
         }
@@ -877,7 +912,7 @@
       updateQR();
     }
 
-    function setQrMode(mode) {
+    function setQrMode(mode, triggerUpdate = true) {
       qrMode = mode;
       document.getElementById('mode-dynamic').className = mode === 'dynamic'
         ? 'px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition'
@@ -886,9 +921,8 @@
         ? 'px-3 py-1.5 rounded-lg text-xs font-bold theme-btn-accent transition'
         : 'px-3 py-1.5 rounded-lg text-xs font-bold theme-text-muted transition';
 
-      document.getElementById('dynamicIdSection').classList.toggle('hidden', mode !== 'dynamic');
-      document.getElementById('saveDynamicBox').classList.toggle('hidden', mode !== 'dynamic');
-      updateQR();
+      document.getElementById('directModeBanner').classList.toggle('hidden', mode !== 'direct');
+      if (triggerUpdate) updateQR();
     }
 
     function setContentType(type, triggerUpdate = true) {
@@ -903,15 +937,13 @@
     }
 
     function getActiveUserContent() {
-      if (contentType === 'url') return document.getElementById('targetUrlInput').value.trim() || 'https://google.com';
-      if (contentType === 'pdf') return document.getElementById('pdfUrlInput').value.trim() || 'https://example.com/file.pdf';
+      if (contentType === 'url') return forceDirectDownloadUrl(document.getElementById('targetUrlInput').value) || 'https://google.com';
+      if (contentType === 'pdf') return forceDirectDownloadUrl(document.getElementById('pdfUrlInput').value) || 'https://example.com/file.pdf';
       if (contentType === 'text') return document.getElementById('targetTextInput').value.trim() || 'مرحباً بك';
       return 'https://google.com';
     }
 
-    function onContentInput() {
-      updateQR();
-    }
+    function onContentInput() { updateQR(); }
 
     function getQrEncodedString() {
       if (qrMode === 'dynamic') {
@@ -925,19 +957,13 @@
       const token = localStorage.getItem('gh_qr_token');
       if (!token) {
         document.getElementById('tokenModal').classList.remove('hidden');
-        alert('يرجى إدخال مفتاح GitHub Token أولاً في الخانة العلوية.');
+        alert('يرجى إدخال مفتاح GitHub Token أولاً.');
         return;
       }
-
-      const fileInput = document.getElementById('pdfFileInput');
-      const file = fileInput.files[0];
-      if (!file) {
-        alert('اختر ملف PDF من جهازك أولاً');
-        return;
-      }
+      const file = document.getElementById('pdfFileInput').files[0];
+      if (!file) { alert('اختر ملف PDF أولاً'); return; }
 
       const btn = document.getElementById('uploadPdfBtn');
-      const status = document.getElementById('pdfUploadStatus');
       btn.disabled = true;
       btn.textContent = 'جاري الرفع...';
 
@@ -948,37 +974,24 @@
           reader.onerror = reject;
           reader.readAsDataURL(file);
         });
-
         const safeName = Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
         const path = `files/${safeName}`;
-
         const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
           method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Upload PDF ${safeName}`,
-            content: base64Content
-          })
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `Upload PDF ${safeName}`, content: base64Content })
         });
-
-        if (!res.ok) throw new Error('فشل رفع الملف، تأكد من صلاحية المفتاح أو حجم الملف');
-
-        const uploadedUrl = `${SITE_BASE_URL}/${path}`;
-        document.getElementById('pdfUrlInput').value = uploadedUrl;
-        status.innerHTML = `<span class="text-emerald-400 font-bold">✓ تم رفع الملف بنجاح! اضغط الآن على زر "حفظ هذا الـ QR مع ملفه" بالأسفل.</span>`;
+        if (!res.ok) throw new Error('فشل رفع الملف');
+        document.getElementById('pdfUrlInput').value = `${SITE_BASE_URL}/${path}`;
         updateQR();
       } catch (err) {
-        status.innerHTML = `<span class="text-rose-400">خطأ: ${err.message}</span>`;
+        alert(err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = '⬆️ رفع الملف وربطه بالكود';
       }
     }
 
-    // حفظ كافة تفاصيل الكيو آر بما في ذلك الشعار وحجمه وألوانه مع الملف
     function getCurrentStyleObject() {
       return {
         dotsColor: document.getElementById('dotsColorPicker').value,
@@ -1001,7 +1014,7 @@
       const token = localStorage.getItem('gh_qr_token');
       if (!token) {
         document.getElementById('tokenModal').classList.remove('hidden');
-        alert('اضغط على زر "إعداد مفتاح الحفظ" في أعلى الصفحة وضع مفتاح GitHub Token.');
+        alert('اضغط على زر "إعدادات الربط والقفل" في أعلى الصفحة وضع مفتاح GitHub Token.');
         return;
       }
 
@@ -1014,7 +1027,7 @@
       btn.disabled = true;
       msgBox.classList.remove('hidden');
       msgBox.className = 'text-xs text-center mt-2 text-amber-400';
-      msgBox.textContent = 'جاري حفظ الكيو آر بتصميمه وشعاره مع الملف...';
+      msgBox.textContent = 'جاري حفظ الكيو آر بتصميمه وشعاره وربط التنزيل الفوري...';
 
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/links.json`;
@@ -1034,6 +1047,7 @@
 
         currentJson[id] = {
           type: contentType,
+          qrMode: qrMode,
           value: val,
           title: title || id,
           updatedAt: nowStr,
@@ -1041,27 +1055,19 @@
         };
 
         const updatedBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentJson, null, 2))));
-
         const putRes = await fetch(apiUrl, {
           method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Save QR and design for ${id}`,
-            content: updatedBase64,
-            sha: sha
-          })
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `Save QR ${id}`, content: updatedBase64, sha: sha })
         });
 
-        if (!putRes.ok) throw new Error('تأكد من صحة الـ Token وصلاحية repo');
+        if (!putRes.ok) throw new Error('تأكد من صحة الـ Token');
 
         linksDb = currentJson;
         renderSavedIds();
         renderSavedCards();
         msgBox.className = 'text-xs text-center mt-2 text-emerald-400 font-bold';
-        msgBox.textContent = `✓ تم حفظ الكود (${id}) مع تصميم الكيو آر وشعاره وملفه بنجاح!`;
+        msgBox.textContent = `✓ تم الحفظ بنجاح! عند مسح الكود سيبدأ تنزيل الملف فوراً (dl=1) دون ظهور موقعك.`;
         updateQR();
       } catch (err) {
         msgBox.className = 'text-xs text-center mt-2 text-rose-400 font-bold';
@@ -1072,48 +1078,26 @@
     }
 
     async function deleteSavedQr(id) {
-      if (!confirm(`هل أنت متأكد من حذف الرمز (${id}) نهائياً؟`)) return;
-
+      if (!confirm(`هل أنت متأكد من حذف الرمز (${id})؟`)) return;
       const token = localStorage.getItem('gh_qr_token');
-      if (!token) {
-        document.getElementById('tokenModal').classList.remove('hidden');
-        alert('يرجى إدخال مفتاح GitHub Token أولاً للحذف.');
-        return;
-      }
+      if (!token) return;
 
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/links.json`;
-        const getRes = await fetch(apiUrl, {
-          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
-
-        if (!getRes.ok) throw new Error('تعذر جلب ملف الروابط');
+        const getRes = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}` } });
         const fileData = await getRes.json();
         const currentJson = JSON.parse(decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, '')))));
-
         delete currentJson[id];
-
         const updatedBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentJson, null, 2))));
-        const putRes = await fetch(apiUrl, {
+        await fetch(apiUrl, {
           method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `Delete QR ${id}`,
-            content: updatedBase64,
-            sha: fileData.sha
-          })
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `Delete ${id}`, content: updatedBase64, sha: fileData.sha })
         });
-
-        if (!putRes.ok) throw new Error('تعذر حذف الرمز');
         linksDb = currentJson;
         renderSavedIds();
         renderSavedCards();
-      } catch (err) {
-        alert('خطأ: ' + err.message);
-      }
+      } catch (err) { alert(err.message); }
     }
 
     function syncColor(target, val) {
@@ -1130,15 +1114,9 @@
       }
     }
 
-    function copyHex(id) {
-      navigator.clipboard.writeText(document.getElementById(id).value);
-    }
+    function copyHex(id) { navigator.clipboard.writeText(document.getElementById(id).value); }
+    function copyText(txt) { navigator.clipboard.writeText(txt); }
 
-    function copyText(txt) {
-      navigator.clipboard.writeText(txt);
-    }
-
-    // ضغط ذكي للشعار عند رفعه ليُحفظ بسرعة فائقة داخل links.json مع الكيو آر الخاص به
     function handleLogoUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1153,10 +1131,8 @@
             else { w = Math.round(w * (maxDim / h)); h = maxDim; }
           }
           const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           uploadedLogoDataUrl = canvas.toDataURL('image/png');
           updateLogoThumbnailUI();
           updateQR();
@@ -1181,12 +1157,12 @@
       document.getElementById('encodedPreviewText').textContent = payload;
       document.getElementById('activeQrBadgeTitle').textContent = qrMode === 'dynamic'
         ? `الكود النشط: ${id}${title ? ' (' + title + ')' : ''}`
-        : 'الوضع العادي المباشر';
+        : `وضع مباشر بدون رابط موقعك (${id})`;
 
       if (qrMode === 'dynamic') {
-        document.getElementById('currentDestinationPreview').textContent = `يحوّل الزائر حالياً إلى: ${getActiveUserContent()}`;
+        document.getElementById('currentDestinationPreview').textContent = `ينزّل فوراً عند المسح: ${getActiveUserContent()}`;
       } else {
-        document.getElementById('currentDestinationPreview').textContent = '';
+        document.getElementById('currentDestinationPreview').textContent = 'مرتبط مباشرة بالملف بدون المرور على github.io';
       }
 
       const isTransparent = document.getElementById('transparentBg').checked;
@@ -1209,30 +1185,12 @@
         data: payload,
         margin: qrMargin,
         image: uploadedLogoDataUrl || undefined,
-        qrOptions: {
-          errorCorrectionLevel: ecLevel,
-          typeNumber: finalTypeNumber
-        },
-        dotsOptions: {
-          color: document.getElementById('dotsColorPicker').value,
-          type: document.getElementById('dotsType').value
-        },
-        cornersSquareOptions: {
-          color: document.getElementById('cornersColorPicker').value,
-          type: document.getElementById('cornerSquareType').value
-        },
-        cornersDotOptions: {
-          color: document.getElementById('cornersColorPicker').value,
-          type: document.getElementById('cornerDotType').value
-        },
-        backgroundOptions: {
-          color: isTransparent ? 'transparent' : document.getElementById('bgColorPicker').value
-        },
-        imageOptions: {
-          hideBackgroundDots: true,
-          imageSize: logoSize,
-          margin: logoMargin
-        }
+        qrOptions: { errorCorrectionLevel: ecLevel, typeNumber: finalTypeNumber },
+        dotsOptions: { color: document.getElementById('dotsColorPicker').value, type: document.getElementById('dotsType').value },
+        cornersSquareOptions: { color: document.getElementById('cornersColorPicker').value, type: document.getElementById('cornerSquareType').value },
+        cornersDotOptions: { color: document.getElementById('cornersColorPicker').value, type: document.getElementById('cornerDotType').value },
+        backgroundOptions: { color: isTransparent ? 'transparent' : document.getElementById('bgColorPicker').value },
+        imageOptions: { hideBackgroundDots: true, imageSize: logoSize, margin: logoMargin }
       });
     }
 
