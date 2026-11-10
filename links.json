@@ -1,25 +1,4 @@
 {
-  "PRO-101": {
-    "type": "url",
-    "value": "https://www.dropbox.com/scl/fi/qxipnqef2coita2wagkey/.pdf?rlkey=a2tlaj98spglt1guekszhiwqq&st=kzvn0gug&raw=1",
-    "title": "كشف الحساب",
-    "updatedAt": "١٠ نوفمبر ٢٠٢٦، ٠٢:٥٢ ص",
-    "style": {
-      "dotsColor": "#2119fa",
-      "cornersColor": "#2119fa",
-      "bgColor": "#ffffff",
-      "transparentBg": false,
-      "dotsType": "rounded",
-      "cornerSquareType": "extra-rounded",
-      "cornerDotType": "dot",
-      "errorCorrectionLevel": "H",
-      "qrTypeNumber": 9,
-      "qrMargin": 6,
-      "logoSize": 0.43,
-      "logoMargin": 6,
-      "logo": ""
-    }
-  },
   "PDF-1": "https://drive.google.com/file/d/YOUR_FILE_ID/view",
   "MENU": "https://example.com/menu.pdf",
   "QR-127": {
