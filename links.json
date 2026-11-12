@@ -67,5 +67,28 @@
       "logoMargin": 6,
       "logo": ""
     }
+  },
+  "DOC-830": {
+    "type": "url",
+    "crypticToken": "0x730e50d31f05e89904",
+    "scanAction": "download_only",
+    "encValue": "0xOSYrICFqbBccbRVxdwc7Iz9xLzc2L1BfShgyPTJ1YAksNVV6YRIjKGlmDi5zdDorQVleXScxNWc/IC4zXC8hJWBzChUMG2U1PTkXA3REPTk6KXd8GzxeLStmdC9+MX5tfCNua0AGREI3MTQ1Jjl6ZA8sJ3F2BSIseD14LCM1FwIERDAlemMWfg",
+    "title": "عنوان علي فاضل",
+    "updatedAt": "١٢ نوفمبر ٢٠٢٦، ١١:١٤ م",
+    "style": {
+      "dotsColor": "#000000",
+      "cornersColor": "#000000",
+      "bgColor": "#ffffff",
+      "transparentBg": false,
+      "dotsType": "rounded",
+      "cornerSquareType": "extra-rounded",
+      "cornerDotType": "dot",
+      "errorCorrectionLevel": "H",
+      "qrTypeNumber": 0,
+      "qrMargin": 8,
+      "logoSize": 0.43,
+      "logoMargin": 6,
+      "logo": ""
+    }
   }
 }
